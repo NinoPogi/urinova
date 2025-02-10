@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import '../../providers/biomarker_provider.dart';
 
 class DeviceStatusWidget extends StatefulWidget {
   const DeviceStatusWidget({super.key});
@@ -79,22 +81,33 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                 await characteristic.setNotifyValue(true);
 
                 characteristic.onValueReceived.listen((value) {
+                  if (!mounted) return;
                   print(value);
+
                   setState(() {
                     closestColor = value[0];
                   });
+
+                  // Update biomarkers
+                  List<String> biomarkers =
+                      value.map((e) => e.toString()).toList();
+                  if (mounted) {
+                    Provider.of<BiomarkerProvider>(context, listen: false)
+                        .updateBiomarkers(biomarkers);
+                  }
                 });
               }
             }
           }
 
-          setState(() {
-            _connectedDevice = r.device;
-            _isConnected = true;
-            _isScanning = false;
-          });
+          if (mounted) {
+            setState(() {
+              _connectedDevice = r.device;
+              _isConnected = true;
+              _isScanning = false;
+            });
+          }
 
-          // Listen for disconnection
           r.device.connectionState.listen((state) {
             if (state == BluetoothConnectionState.disconnected) {
               if (!mounted) return;
@@ -105,10 +118,12 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
             }
           });
         } catch (e) {
-          setState(() {
-            _isScanning = false;
-            _isConnected = false;
-          });
+          if (mounted) {
+            setState(() {
+              _isScanning = false;
+              _isConnected = false;
+            });
+          }
         }
       }
     });
@@ -116,8 +131,7 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
     FlutterBluePlus.cancelWhenScanComplete(subscription);
 
     Future.delayed(const Duration(seconds: 5), () {
-      if (!_isConnected) {
-        if (!mounted) return;
+      if (!_isConnected && mounted) {
         setState(() {
           _isScanning = false;
         });
