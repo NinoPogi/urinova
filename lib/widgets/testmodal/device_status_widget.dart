@@ -13,32 +13,8 @@ class DeviceStatusWidget extends StatefulWidget {
 
 class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
   BluetoothDevice? _connectedDevice;
-  BluetoothCharacteristic? _bluetoothCharacteristic;
   bool _isConnected = false;
   bool _isScanning = false;
-  int closestColor = 7;
-
-  List<String> colorList = [
-    "Red",
-    "Orange",
-    "Yellow",
-    "Green",
-    "Blue",
-    "Indigo",
-    "Violet",
-    " "
-  ];
-
-  List<MaterialColor> bgList = [
-    Colors.red,
-    Colors.orange,
-    Colors.yellow,
-    Colors.green,
-    Colors.blue,
-    Colors.indigo,
-    Colors.purple,
-    Colors.grey,
-  ];
 
   @override
   void dispose() {
@@ -53,8 +29,6 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
     setState(() {
       _isScanning = true;
     });
-
-    print(dotenv.env['BLE_CHARACTERISTIC_UUID']);
 
     await FlutterBluePlus.startScan(
       timeout: const Duration(seconds: 4),
@@ -77,18 +51,13 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                 service.characteristics;
             for (BluetoothCharacteristic characteristic in characteristics) {
               if (characteristic.characteristicUuid.toString() ==
-                  dotenv.env['BLE_CHARACTERISTIC_UUID']) {
+                  dotenv.env['BLE_NOTIFY']) {
                 await characteristic.setNotifyValue(true);
 
                 characteristic.onValueReceived.listen((value) {
                   if (!mounted) return;
                   print(value);
 
-                  setState(() {
-                    closestColor = value[0];
-                  });
-
-                  // Update biomarkers
                   List<String> biomarkers =
                       value.map((e) => e.toString()).toList();
                   if (mounted) {
@@ -139,93 +108,116 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
     });
   }
 
+  void _sendData() async {
+    if (_connectedDevice == null || !_isConnected) return;
+
+    List<BluetoothService> services =
+        await _connectedDevice!.discoverServices();
+    for (BluetoothService service in services) {
+      for (BluetoothCharacteristic characteristic in service.characteristics) {
+        if (characteristic.characteristicUuid.toString() ==
+            dotenv.env['BLE_WRITE']) {
+          await characteristic.write([0x01], timeout: 30);
+          break;
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(22),
-          ),
-          child: Column(
-            children: [
-              Text(
-                'Device Status',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Work Sans',
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -1,
-                ),
+        Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Color.fromARGB(255, 255, 246, 238),
+                borderRadius: BorderRadius.circular(22),
               ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
+              child: Column(
                 children: [
-                  SizedBox(
-                    height: 120,
-                    width: 135,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        'assets/images/device.gif',
-                        fit: BoxFit.cover,
-                      ),
+                  Text(
+                    'Device Status',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Work Sans',
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -1,
                     ),
                   ),
                   SizedBox(
-                    width: 20,
+                    height: 10,
                   ),
-                  Column(
+                  Row(
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          if (_isConnected) {
-                            _connectedDevice?.disconnect();
-                            setState(() {
-                              _isConnected = false;
-                            });
-                          } else {
-                            _startScanAndConnect();
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _isConnected ? Colors.green : Colors.blue,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 12),
+                      SizedBox(
+                        height: 120,
+                        width: 135,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.asset(
+                            'assets/images/device.gif',
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        child: _isScanning
-                            ? const CircularProgressIndicator(
-                                color: Colors.white)
-                            : Text(
-                                _isConnected ? "Connected" : "Connect to ESP32",
-                                style: const TextStyle(fontSize: 18),
-                              ),
                       ),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () async {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: bgList[closestColor],
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 12),
-                        ),
-                        child: Text(
-                          colorList[closestColor],
-                          style: TextStyle(color: Colors.white),
-                        ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              if (_isConnected) {
+                                _connectedDevice?.disconnect();
+                                setState(() {
+                                  _isConnected = false;
+                                });
+                              } else {
+                                _startScanAndConnect();
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  _isConnected ? Colors.green : Colors.blue,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 12),
+                            ),
+                            child: _isScanning
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white)
+                                : Text(
+                                    _isConnected ? "Connected" : "Connect",
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
                       ),
                     ],
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            ElevatedButton(
+              onPressed: _isConnected ? _sendData : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _isConnected ? Colors.orange : Colors.grey,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 100, vertical: 12),
+              ),
+              child: const Text(
+                "Scan",
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
         ),
       ],
     );

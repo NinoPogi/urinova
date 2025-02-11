@@ -14,4 +14,24 @@ Specific Gravity, pH, Nitrites, Ketones, Bilirubin, Urobilinogen, Protein, Gluco
   [1.025, 8.0, "++", 150 (15), "+", "+", 8 (140), 300 (3.0), "ca. 25", "ca. 500"],  
   [1.005, 5.5, "neg.", "neg.", "neg.", "+", "normal", 15 (0.15), "neg.", "ca. 125"],  
   [1.000, 5.0, "+", 5 (0.5), "neg.", "+++", 12 (200), 1000 (10), "ca. 50", "ca. 500"]  
+                   
                                                                                                                                                                                                                                                                                                                                                                                                  
+class Biomarker {
+  final String name;
+  final List<String> values;
+
+  Biomarker(this.name, this.values);
+}
+
+List<Biomarker> biomarkers = [
+  Biomarker("Leukocytes (LEU)", ["Negative (-)", "15 ±", "70+", "125++", "500+++"]),
+  Biomarker("Nitrites (NIT)", ["Negative (-)", "Positive (+)"]),
+  Biomarker("Urobilinogen (URO)", ["0 (3.5)", "1 (17)", "2 (35)", "4 (70)", "8 (140)", "12 (200)"]),
+  Biomarker("Proteins (PRO)", ["Negative (-)", "15 (0.15)", "30 (0.3)+", "100 (1.0)++", "300 (3.0)+++", "2000 (20)+++"]),
+  Biomarker("pH", ["5.0", "6.0", "6.5", "7.0", "7.5", "8.0", "9.0"]),
+  Biomarker("Blood (BLO)", ["Negative (-)", "±", "+", "++", "+++", "5-10 Ery/µL", "50 Ery/µL"]),
+  Biomarker("Specific Gravity (SG)", ["1.000", "1.005", "1.010", "1.015", "1.020", "1.025", "1.030"]),
+  Biomarker("Ketones (KET)", ["Negative (-)", "5 (0.5)", "15 (1.5)", "40 (4.0)", "80 (8.0)", "160 (16)"]),
+  Biomarker("Bilirubin (BIL)", ["Negative (-)", "1 (17)+", "2 (35)++", "4 (70)+++"]),
+  Biomarker("Glucose (GLU)", ["Negative (-)", "100 (5)", "250 (15)", "500 (30)", "1000 (60)", "≥2000 (110)"]),
+];
