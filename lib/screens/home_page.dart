@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:urinova/constants/biomarker_constant.dart';
+import 'package:urinova/providers/biomarker_provider.dart';
 import 'package:urinova/widgets/header_part.dart';
 import 'package:urinova/widgets/homepage/test_schedule_card.dart';
 import 'package:urinova/widgets/homepage/risk_alert_card.dart';
@@ -12,38 +14,27 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profileProvider = Provider.of<ProfileProvider>(context);
-    final List<Map<String, dynamic>> biomarkers = [
-      {"name": "Specific Gravity", "value": "1.015", "color": Colors.green},
-      {"name": "pH", "value": "6.5", "color": Colors.green},
-      {"name": "Nitrites", "value": "Neg.", "color": Colors.green},
-      {
-        "name": "Ketones",
-        "value": "5 (0.5)",
-        "color": Colors.orange
-      }, // Slightly high
-      {"name": "Bilirubin", "value": "Neg.", "color": Colors.green},
-      {
-        "name": "Urobilinogen",
-        "value": "+",
-        "color": Colors.orange
-      }, // Slight elevation
-      {"name": "Protein", "value": "7 (70)", "color": Colors.red}, // High
-      {
-        "name": "Glucose",
-        "value": "30 (0.3)",
-        "color": Colors.orange
-      }, // Moderate risk
-      {
-        "name": "Blood/Hemoglobin",
-        "value": "Neg.",
-        "color": Colors.green
-      }, // High concern
-      {
-        "name": "Leukocytes",
-        "value": "ca. 50",
-        "color": Colors.red
-      }, // High concern
-    ];
+    final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
+    final hasHistory = biomarkerProvider.history.isNotEmpty;
+
+    Color getSeverityColor(int value) {
+      if (value <= 1) return Colors.green;
+      if (value <= 3) return Colors.orange;
+      return Colors.red;
+    }
+
+    final List<Map<String, dynamic>> biomarkers = hasHistory
+        ? biomarkerProvider.biomarkers.asMap().entries.map((entry) {
+            final index = entry.key;
+            final value = entry.value;
+            final color = getSeverityColor(value);
+            return {
+              "name": biomarkerNames[index],
+              "value": biomarkerValues[index][value],
+              "color": color,
+            };
+          }).toList()
+        : [];
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 246, 238),
@@ -63,7 +54,7 @@ class HomePage extends StatelessWidget {
           SizedBox(height: 20),
           SizedBox(
             width: MediaQuery.of(context).size.width,
-            height: 1095,
+            height: hasHistory ? 1095 : 495,
             child: OverflowBox(
               maxWidth: MediaQuery.of(context).size.width,
               child: Container(
@@ -97,19 +88,32 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 22),
-                      Column(
-                        children: biomarkers
-                            .map((b) => Padding(
-                                  padding: const EdgeInsets.only(
-                                      bottom: 12.0), // Add spacing
-                                  child: BiomarkerCard(
-                                    name: b["name"],
-                                    value: b["value"],
-                                    color: b["color"],
+                      hasHistory
+                          ? Column(
+                              children: biomarkers
+                                  .map((b) => Padding(
+                                        padding: const EdgeInsets.only(
+                                            bottom: 12.0), // Add spacing
+                                        child: BiomarkerCard(
+                                          name: b["name"],
+                                          value: b["value"],
+                                          color: b["color"],
+                                        ),
+                                      ))
+                                  .toList(),
+                            )
+                          : Column(
+                              children: [
+                                Text(
+                                  "Conduct test first",
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontFamily: 'Work Sans',
+                                    letterSpacing: -1,
                                   ),
-                                ))
-                            .toList(),
-                      ),
+                                )
+                              ],
+                            )
                     ],
                   ),
                 ),

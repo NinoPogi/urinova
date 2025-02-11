@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:urinova/constants/biomarker_constant.dart';
+import 'package:urinova/providers/biomarker_provider.dart';
 import 'package:urinova/widgets/header_part.dart';
 
 class RecommendPage extends StatelessWidget {
@@ -6,38 +9,27 @@ class RecommendPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> biomarkers = [
-      {"name": "Specific Gravity", "value": "1.015", "color": Colors.green},
-      {"name": "pH", "value": "6.5", "color": Colors.green},
-      {"name": "Nitrites", "value": "Neg.", "color": Colors.green},
-      {
-        "name": "Ketones",
-        "value": "5 (0.5)",
-        "color": Colors.orange
-      }, // Slightly high
-      {"name": "Bilirubin", "value": "Neg.", "color": Colors.green},
-      {
-        "name": "Urobilinogen",
-        "value": "+",
-        "color": Colors.orange
-      }, // Slight elevation
-      {"name": "Protein", "value": "7 (70)", "color": Colors.red}, // High
-      {
-        "name": "Glucose",
-        "value": "30 (0.3)",
-        "color": Colors.orange
-      }, // Moderate risk
-      {
-        "name": "Blood/Hemoglobin",
-        "value": "Neg.",
-        "color": Colors.green
-      }, // High concern
-      {
-        "name": "Leukocytes",
-        "value": "ca. 50",
-        "color": Colors.red
-      }, // High concern
-    ];
+    final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
+    final hasHistory = biomarkerProvider.history.isNotEmpty;
+
+    Color getSeverityColor(int value) {
+      if (value <= 1) return Colors.green;
+      if (value <= 3) return Colors.orange;
+      return Colors.red;
+    }
+
+    final List<Map<String, dynamic>> biomarkers = hasHistory
+        ? biomarkerProvider.biomarkers.asMap().entries.map((entry) {
+            final index = entry.key;
+            final value = entry.value;
+            final color = getSeverityColor(value);
+            return {
+              "name": biomarkerNames[index],
+              "value": biomarkerValues[index][value],
+              "color": color,
+            };
+          }).toList()
+        : [];
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 246, 238),
