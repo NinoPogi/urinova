@@ -125,7 +125,7 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
       for (BluetoothCharacteristic characteristic in service.characteristics) {
         if (characteristic.characteristicUuid.toString() ==
             dotenv.env['BLE_WRITE']) {
-          await characteristic.write([0x01], timeout: 30);
+          await characteristic.write([0x01], timeout: 120);
           break;
         }
       }

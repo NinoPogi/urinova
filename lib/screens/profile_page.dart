@@ -110,10 +110,10 @@ class ProfileOption extends StatelessWidget {
         child: Text(
           name,
           style: const TextStyle(
-            fontSize: 22,
-            fontFamily: 'Work Sans',
-            letterSpacing: -1,
-          ),
+              fontSize: 22,
+              fontFamily: 'Work Sans',
+              letterSpacing: -1,
+              decoration: TextDecoration.lineThrough),
         ),
       ),
     );
