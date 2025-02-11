@@ -27,10 +27,13 @@ class HomePage extends StatelessWidget {
         ? biomarkerProvider.biomarkers.asMap().entries.map((entry) {
             final index = entry.key;
             final value = entry.value;
-            final color = getSeverityColor(value);
+            final validValue = value < biomarkerValues[index].length
+                ? value
+                : biomarkerValues[index].length - 1;
+            final color = getSeverityColor(validValue);
             return {
               "name": biomarkerNames[index],
-              "value": biomarkerValues[index][value],
+              "value": biomarkerValues[index][validValue],
               "color": color,
             };
           }).toList()
