@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:urinova/providers/biomarker_provider.dart';
 import 'screens/home_page.dart';
 import 'screens/recommend_page.dart';
 import 'screens/insights_page.dart';
@@ -25,8 +26,11 @@ class Urinova extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    return ChangeNotifierProvider(
-      create: (_) => ProfileProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => BiomarkerProvider()),
+      ],
       child: MaterialApp(
         title: 'Urinova',
         theme: ThemeData(

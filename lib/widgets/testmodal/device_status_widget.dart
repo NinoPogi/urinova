@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 import '../../providers/biomarker_provider.dart';
 
 class DeviceStatusWidget extends StatefulWidget {
-  const DeviceStatusWidget({super.key});
+  const DeviceStatusWidget({super.key, required this.onTestComplete});
+  final VoidCallback onTestComplete;
 
   @override
   State<DeviceStatusWidget> createState() => _DeviceStatusWidgetState();
@@ -15,6 +16,7 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
   BluetoothDevice? _connectedDevice;
   bool _isConnected = false;
   bool _isScanning = false;
+  bool _isSending = false;
 
   @override
   void dispose() {
@@ -54,15 +56,17 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                   dotenv.env['BLE_NOTIFY']) {
                 await characteristic.setNotifyValue(true);
 
-                characteristic.onValueReceived.listen((value) {
+                characteristic.onValueReceived.listen((received) {
                   if (!mounted) return;
-                  print(value);
 
-                  List<String> biomarkers =
-                      value.map((e) => e.toString()).toList();
+                  List<int> firstBytes = [];
+                  for (int i = 0; i < received.length; i += 4) {
+                    firstBytes.add(received[i]);
+                  }
+
                   if (mounted) {
                     Provider.of<BiomarkerProvider>(context, listen: false)
-                        .updateBiomarkers(biomarkers);
+                        .updateBiomarkers(firstBytes);
                   }
                 });
               }
@@ -109,7 +113,11 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
   }
 
   void _sendData() async {
-    if (_connectedDevice == null || !_isConnected) return;
+    if (_connectedDevice == null || !_isConnected || _isSending) return;
+
+    setState(() {
+      _isSending = true;
+    });
 
     List<BluetoothService> services =
         await _connectedDevice!.discoverServices();
@@ -121,6 +129,13 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
           break;
         }
       }
+    }
+
+    if (mounted) {
+      setState(() {
+        _isSending = false;
+      });
+      widget.onTestComplete();
     }
   }
 
@@ -206,16 +221,17 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
               height: 10,
             ),
             ElevatedButton(
-              onPressed: _isConnected ? _sendData : null,
+              onPressed: _isConnected && !_isSending ? _sendData : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _isConnected ? Colors.orange : Colors.grey,
+                backgroundColor: _isSending
+                    ? Colors.grey
+                    : (_isConnected ? Colors.orange : Colors.grey),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 100, vertical: 12),
               ),
-              child: const Text(
-                "Scan",
-                style: TextStyle(fontSize: 18),
-              ),
+              child: _isSending
+                  ? const Text("Testing...", style: TextStyle(fontSize: 18))
+                  : const Text("Test", style: TextStyle(fontSize: 18)),
             ),
           ],
         ),

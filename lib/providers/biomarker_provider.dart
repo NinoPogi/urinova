@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class BiomarkerProvider with ChangeNotifier {
-  List<String> _biomarkers = [];
+  List<int> _biomarkers = [];
 
-  List<String> get biomarkers => _biomarkers;
+  List<int> get biomarkers => _biomarkers;
 
-  void updateBiomarkers(List<String> newBiomarkers) {
+  void updateBiomarkers(List<int> newBiomarkers) {
     _biomarkers = newBiomarkers;
     notifyListeners();
   }
