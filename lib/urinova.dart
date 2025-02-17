@@ -97,62 +97,67 @@ class _MainState extends State<Main> {
         }
       },
       child: Scaffold(
-          body: _pages[_currentIndex],
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _showModal(context),
-            shape: RoundedRectangleBorder(
-                side: BorderSide(width: .5, color: Colors.grey),
-                borderRadius: BorderRadius.circular(42)),
-            backgroundColor: const Color.fromARGB(255, 255, 162, 82),
-            label: const Text(
-              "Test Now",
-              style: TextStyle(color: Colors.white),
-            ),
-            icon: Icon(
-              Icons.add,
-              color: Colors.white,
-            ),
-            elevation: 0,
+        body: _pages[_currentIndex],
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => _showModal(context),
+          shape: RoundedRectangleBorder(
+              side: BorderSide(width: .5, color: Colors.grey),
+              borderRadius: BorderRadius.circular(42)),
+          backgroundColor: const Color.fromARGB(255, 255, 162, 82),
+          label: const Text(
+            "Test Now",
+            style: TextStyle(color: Colors.white),
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-          bottomNavigationBar: Container(
-            decoration: BoxDecoration(
-                border: Border(
-                    top: BorderSide(
-              color: Colors.grey,
-              width: .5,
-            ))),
-            padding: const EdgeInsets.only(bottom: 12, top: 6),
-            child: NavigationBar(
-              selectedIndex: _currentIndex,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              indicatorColor: const Color.fromARGB(255, 255, 218, 186),
-              onDestinationSelected: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              destinations: [
-                const NavigationDestination(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                ),
-                const NavigationDestination(
-                  icon: Icon(Icons.book),
-                  label: 'Recommend',
-                ),
-                const NavigationDestination(
-                  icon: Icon(Icons.lightbulb),
-                  label: 'Insight',
-                ),
-                const NavigationDestination(
-                  icon: Icon(Icons.person),
-                  label: 'Profile',
-                ),
-              ],
+          icon: Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+          elevation: 0,
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: Colors.grey,
+                width: .5,
+              ),
             ),
-          )),
+          ),
+          padding: const EdgeInsets.only(bottom: 12, top: 6),
+          child: NavigationBar(
+            selectedIndex: _currentIndex,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            indicatorColor: const Color.fromARGB(255, 255, 218, 186),
+            onDestinationSelected: (index) {
+              setState(
+                () {
+                  _currentIndex = index;
+                },
+              );
+            },
+            destinations: [
+              const NavigationDestination(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              const NavigationDestination(
+                icon: Icon(Icons.book),
+                label: 'Recommend',
+              ),
+              const NavigationDestination(
+                icon: Icon(Icons.lightbulb),
+                label: 'Insight',
+              ),
+              const NavigationDestination(
+                icon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
