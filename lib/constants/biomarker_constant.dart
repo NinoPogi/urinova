@@ -51,3 +51,48 @@ const List<List<String>> biomarkerValues = [
   ["Negative (-)", "±", "+", "++", "+++", "5-10 Ery/µL", "50 Ery/µL"], // Blood
   ["Negative (-)", "15 ±", "70+", "125++", "500+++"] // Leukocytes
 ];
+
+const Map<String, Map<String, String>> recommendationTable = {
+  "Glucose": {
+    "1": "Maintain balanced diet",
+    "2": "Reduce carbs, exercise",
+    "3": "Consult doctor"
+  },
+  "Bilirubin": {
+    "1": "No change",
+    "2": "Increase water",
+    "3": "Liver evaluation"
+  },
+  "Ketones": {"1": "No change", "2": "Drink water", "3": "Increase carbs"},
+  "Specific Gravity": {
+    "1": "Stay hydrated",
+    "2": "Avoid dehydration",
+    "3": "Check kidney function"
+  },
+  "Blood": {
+    "1": "Normal diet",
+    "2": "Hydrate, rest",
+    "3": "Seek medical advice"
+  },
+  "pH": {
+    "1": "Maintain balanced diet",
+    "2": "Adjust to acidic foods",
+    "3": "Consult doctor"
+  },
+  "Protein": {"1": "No action", "2": "Reduce sodium", "3": "Consult doctor"},
+  "Urobilinogen": {
+    "1": "Balanced diet",
+    "2": "Increase hydration",
+    "3": "Liver evaluation"
+  },
+  "Nitrites": {
+    "1": "Maintain hygiene",
+    "2": "Increase water",
+    "3": "Seek medical attention"
+  },
+  "Leukocytes": {
+    "1": "Normal hydration",
+    "2": "Increase water",
+    "3": "Test for infection"
+  }
+};

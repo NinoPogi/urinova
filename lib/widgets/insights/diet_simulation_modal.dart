@@ -115,7 +115,7 @@ class _DietSimulationModalState extends State<DietSimulationModal> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(60),
       child: Column(
         children: [
           Text('Diet Simulation',

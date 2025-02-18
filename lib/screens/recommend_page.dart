@@ -3,9 +3,21 @@ import 'package:provider/provider.dart';
 import 'package:urinova/constants/biomarker_constant.dart';
 import 'package:urinova/providers/biomarker_provider.dart';
 import 'package:urinova/widgets/header_part.dart';
+import 'package:urinova/widgets/recommend/recommendation_modal.dart';
 
 class RecommendPage extends StatelessWidget {
   const RecommendPage({super.key});
+
+  void _showRecommendationModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return const RecommendationModal();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +33,8 @@ class RecommendPage extends StatelessWidget {
     final List<Map<String, dynamic>> biomarkers = hasHistory
         ? biomarkerProvider.biomarkers.asMap().entries.map((entry) {
             final index = entry.key;
-            final value = entry.value;
+            final value = entry.value.clamp(
+                0, biomarkerValues[index].length - 1); // Prevent out-of-bounds
             final color = getSeverityColor(value);
             return {
               "name": biomarkerNames[index],
@@ -54,20 +67,33 @@ class RecommendPage extends StatelessWidget {
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(22)),
                       color: Colors.white),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ...biomarkers.map((b) => Text(
-                            b["name"],
-                            style: TextStyle(
+                  child: hasHistory
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ...biomarkers.map((b) => Text(
+                                  b["name"],
+                                  style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Work Sans',
+                                      letterSpacing: -1,
+                                      color: b["color"]),
+                                ))
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            Text(
+                              "Conduct test first",
+                              style: TextStyle(
                                 fontSize: 22,
-                                fontWeight: FontWeight.bold,
                                 fontFamily: 'Work Sans',
                                 letterSpacing: -1,
-                                color: b["color"]),
-                          ))
-                    ],
-                  ),
+                              ),
+                            )
+                          ],
+                        ),
                 ),
                 Container(
                   padding: EdgeInsets.all(20),
@@ -86,20 +112,20 @@ class RecommendPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Stack(
-                    children: [
-                      Text(
+                  child: Stack(children: [
+                    GestureDetector(
+                      onTap: () => _showRecommendationModal(context),
+                      child: Text(
                         'View Recommendation',
                         style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Work Sans',
-                            letterSpacing: -1,
-                            color: Colors.white,
-                            decoration: TextDecoration.lineThrough),
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'Work Sans',
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ]),
                 ),
               ],
             ),

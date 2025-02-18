@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:urinova/providers/biomarker_provider.dart';
 import 'package:urinova/widgets/insights/diet_simulation_modal.dart';
 
 class DietSimulationCard extends StatefulWidget {
