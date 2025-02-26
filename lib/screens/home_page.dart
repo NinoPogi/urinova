@@ -6,14 +6,12 @@ import 'package:urinova/widgets/header_part.dart';
 import 'package:urinova/widgets/homepage/test_schedule_card.dart';
 import 'package:urinova/widgets/homepage/risk_alert_card.dart';
 import 'package:urinova/widgets/homepage/biomarker_card.dart';
-import 'package:urinova/providers/profile_provider.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final profileProvider = Provider.of<ProfileProvider>(context);
     final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
     final hasHistory = biomarkerProvider.history.isNotEmpty;
 
@@ -44,7 +42,7 @@ class HomePage extends StatelessWidget {
       body: ListView(
         padding: EdgeInsets.only(top: 56, left: 25, right: 25),
         children: [
-          HeaderPart(name: "Hello, ${profileProvider.name} 👋"),
+          HeaderPart(name: "Hello, 👋"),
           SizedBox(height: 100),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

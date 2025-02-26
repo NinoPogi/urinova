@@ -1,24 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:urinova/providers/biomarker_provider.dart';
+import 'providers/user_provider.dart';
+import 'package:urinova/screens/auth_page.dart';
 import 'screens/home_page.dart';
 import 'screens/recommend_page.dart';
 import 'screens/insights_page.dart';
 import 'screens/profile_page.dart';
 import 'screens/test_modal.dart';
-import 'screens/first_time_setup.dart';
-import 'providers/profile_provider.dart';
 
 class Urinova extends StatelessWidget {
   const Urinova({super.key});
-
-  Future<bool> _checkFirstTime() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
-    return isFirstTime;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +21,7 @@ class Urinova extends StatelessWidget {
     ]);
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => BiomarkerProvider()),
       ],
       child: MaterialApp(
@@ -38,24 +31,71 @@ class Urinova extends StatelessWidget {
           useMaterial3: true,
         ),
         debugShowCheckedModeBanner: true,
-        home: FutureBuilder<bool>(
-          future: _checkFirstTime(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()));
-            } else if (snapshot.hasData && snapshot.data!) {
-              return FirstTimeSetupPage();
-            } else {
-              return const Main();
-            }
-          },
+        home: AuthWrapper(),
+      ),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    if (userProvider.user == null) {
+      return AuthPage();
+    } else if (userProvider.profiles.isEmpty) {
+      return FirstTimeProfileSetup();
+    } else {
+      return Main();
+    }
+  }
+}
+
+class FirstTimeProfileSetup extends StatefulWidget {
+  @override
+  _FirstTimeProfileSetupState createState() => _FirstTimeProfileSetupState();
+}
+
+class _FirstTimeProfileSetupState extends State<FirstTimeProfileSetup> {
+  final _nameController = TextEditingController();
+
+  Future<void> _completeSetup() async {
+    if (_nameController.text.isNotEmpty) {
+      await Provider.of<UserProvider>(context, listen: false)
+          .addProfile(_nameController.text);
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => Main()));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Welcome! Create your first profile'),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: TextField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Profile Name'),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: _completeSetup,
+              child: Text('Continue'),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
+// Rest of Main class remains unchanged
 class Main extends StatefulWidget {
   const Main({super.key});
 
@@ -65,7 +105,6 @@ class Main extends StatefulWidget {
 
 class _MainState extends State<Main> {
   int _currentIndex = 0;
-
   final List<Widget> _pages = const [
     HomePage(),
     RecommendPage(),
@@ -104,25 +143,14 @@ class _MainState extends State<Main> {
               side: BorderSide(width: .5, color: Colors.grey),
               borderRadius: BorderRadius.circular(42)),
           backgroundColor: const Color.fromARGB(255, 255, 162, 82),
-          label: const Text(
-            "Test Now",
-            style: TextStyle(color: Colors.white),
-          ),
-          icon: Icon(
-            Icons.add,
-            color: Colors.white,
-          ),
+          label: const Text("Test Now", style: TextStyle(color: Colors.white)),
+          icon: Icon(Icons.add, color: Colors.white),
           elevation: 0,
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(
-                color: Colors.grey,
-                width: .5,
-              ),
-            ),
+            border: Border(top: BorderSide(color: Colors.grey, width: .5)),
           ),
           padding: const EdgeInsets.only(bottom: 12, top: 6),
           child: NavigationBar(
@@ -131,29 +159,17 @@ class _MainState extends State<Main> {
             elevation: 0,
             indicatorColor: const Color.fromARGB(255, 255, 218, 186),
             onDestinationSelected: (index) {
-              setState(
-                () {
-                  _currentIndex = index;
-                },
-              );
+              setState(() => _currentIndex = index);
             },
             destinations: [
               const NavigationDestination(
-                icon: Icon(Icons.home),
-                label: 'Home',
-              ),
+                  icon: Icon(Icons.home), label: 'Home'),
               const NavigationDestination(
-                icon: Icon(Icons.book),
-                label: 'Recommend',
-              ),
+                  icon: Icon(Icons.book), label: 'Recommend'),
               const NavigationDestination(
-                icon: Icon(Icons.lightbulb),
-                label: 'Insight',
-              ),
+                  icon: Icon(Icons.lightbulb), label: 'Insight'),
               const NavigationDestination(
-                icon: Icon(Icons.person),
-                label: 'Profile',
-              ),
+                  icon: Icon(Icons.person), label: 'Profile'),
             ],
           ),
         ),

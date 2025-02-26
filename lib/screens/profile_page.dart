@@ -1,121 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:urinova/providers/profile_provider.dart';
+import 'package:urinova/providers/user_provider.dart';
+import 'package:urinova/screens/auth_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final profileProvider = Provider.of<ProfileProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 246, 238),
       body: Padding(
-        padding: const EdgeInsets.only(top: 200, left: 25, right: 25),
-        child: Center(
-          child: Column(
-            children: [
-              const CircleAvatar(
-                radius: 69,
-                backgroundImage: AssetImage("assets/images/profile.png"),
-              ),
-              SizedBox(
-                height: 60,
-              ),
+        padding: const EdgeInsets.only(top: 100, left: 25, right: 25),
+        child: Column(
+          children: [
+            if (userProvider.currentProfile != null)
               Text(
-                profileProvider.name,
-                style: const TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Work Sans',
-                  letterSpacing: -1,
-                ),
+                'Current Profile: ${userProvider.currentProfile!['name']}',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              SizedBox(
-                height: 60,
+            SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: userProvider.profiles.length,
+                itemBuilder: (context, index) {
+                  final profile = userProvider.profiles[index];
+                  return ListTile(
+                    title: Text(profile['name']),
+                    trailing: Icon(Icons.arrow_forward),
+                    onTap: () => userProvider.setCurrentProfile(profile),
+                  );
+                },
               ),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 8,
-                      offset: Offset(0, 6),
-                      spreadRadius: -7,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ProfileOption(
-                        name: "User Info", onTap: () => print("User Info")),
-                    Container(
-                      width: 200,
-                      height: 2,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(22),
-                      ),
-                    ),
-                    ProfileOption(
-                        name: "Settings", onTap: () => print("Settings")),
-                    Container(
-                      width: 200,
-                      height: 2,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(22),
-                      ),
-                    ),
-                    ProfileOption(
-                        name: "Manage Profiles",
-                        onTap: () => print("Manage Profiles")),
-                    Container(
-                      width: 200,
-                      height: 2,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(22),
-                      ),
-                    ),
-                    ProfileOption(
-                        name: "Export Data", onTap: () => print("Export Data")),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+            ElevatedButton(
+              onPressed: () => _showAddProfileDialog(context),
+              child: Text('Add Profile'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await userProvider.logout();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => AuthPage()),
+                  (route) => false,
+                );
+              },
+              child: Text('Logout'),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class ProfileOption extends StatelessWidget {
-  final String name;
-  final VoidCallback onTap;
+void _showAddProfileDialog(BuildContext context) {
+  final _nameController = TextEditingController();
 
-  const ProfileOption({super.key, required this.name, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(12),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Text(
-          name,
-          style: const TextStyle(
-              fontSize: 22,
-              fontFamily: 'Work Sans',
-              letterSpacing: -1,
-              decoration: TextDecoration.lineThrough),
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Add Profile'),
+        content: TextField(
+          controller: _nameController,
+          decoration: InputDecoration(labelText: 'Profile Name'),
         ),
-      ),
-    );
-  }
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = _nameController.text;
+              if (name.isNotEmpty) {
+                Provider.of<UserProvider>(context, listen: false)
+                    .addProfile(name);
+                Navigator.pop(context);
+              }
+            },
+            child: Text('Add'),
+          ),
+        ],
+      );
+    },
+  );
 }

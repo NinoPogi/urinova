@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:urinova/providers/user_provider.dart';
 
 class HeaderPart extends StatefulWidget {
   final String name;
@@ -13,12 +15,15 @@ class HeaderPart extends StatefulWidget {
 class _HeaderPartState extends State<HeaderPart> {
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final profileName = userProvider.currentProfile?['name'] ?? 'User';
+
     return SizedBox(
       height: 60,
       child: Row(
         children: [
           Text(
-            widget.name,
+            widget.name.replaceFirst('Hello,', 'Hello, $profileName'),
             style: TextStyle(
               fontSize: widget.fontSize,
               fontWeight: FontWeight.bold,
