@@ -18,6 +18,9 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
   bool _isScanning = false;
   bool _isSending = false;
 
+  int _batteryLevel = 100; // Example value (0-100)
+  int _urineLevel = 75; // Example value (0-100)
+
   @override
   void dispose() {
     super.dispose();
@@ -139,6 +142,12 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
     }
   }
 
+  Color _getLevelColor(int level) {
+    if (level >= 70) return Colors.green;
+    if (level >= 30) return Colors.yellow;
+    return Colors.red;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -163,9 +172,7 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                       letterSpacing: -1,
                     ),
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
+                  SizedBox(height: 10),
                   Row(
                     children: [
                       SizedBox(
@@ -179,11 +186,34 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        width: 20,
-                      ),
+                      SizedBox(width: 20),
                       Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Battery: $_batteryLevel%',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: _getLevelColor(_batteryLevel),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Text(
+                                'Urine Level: $_urineLevel%',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: _getLevelColor(_urineLevel),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 12),
                           ElevatedButton(
                             onPressed: () {
                               if (_isConnected) {
@@ -209,7 +239,6 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                                     style: const TextStyle(fontSize: 18),
                                   ),
                           ),
-                          const SizedBox(height: 12),
                         ],
                       ),
                     ],
@@ -217,9 +246,7 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                 ],
               ),
             ),
-            SizedBox(
-              height: 10,
-            ),
+            SizedBox(height: 10),
             ElevatedButton(
               onPressed: _isConnected && !_isSending ? _sendData : null,
               style: ElevatedButton.styleFrom(

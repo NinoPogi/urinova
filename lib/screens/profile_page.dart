@@ -27,10 +27,46 @@ class ProfilePage extends StatelessWidget {
                 itemCount: userProvider.profiles.length,
                 itemBuilder: (context, index) {
                   final profile = userProvider.profiles[index];
-                  return ListTile(
-                    title: Text(profile['name']),
-                    trailing: Icon(Icons.arrow_forward),
-                    onTap: () => userProvider.setCurrentProfile(profile),
+                  return Dismissible(
+                    key: Key(profile['id']),
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.only(right: 20),
+                      child: Icon(Icons.delete, color: Colors.white),
+                    ),
+                    confirmDismiss: (direction) async {
+                      return await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Delete Profile?'),
+                          content: Text(
+                              'Are you sure you want to delete ${profile['name']}?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: Text('Delete',
+                                  style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    onDismissed: (direction) {
+                      userProvider.deleteProfile(profile['id']);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${profile['name']} deleted')),
+                      );
+                    },
+                    child: ListTile(
+                      title: Text(profile['name']),
+                      trailing: Icon(Icons.arrow_forward),
+                      onTap: () => userProvider.setCurrentProfile(profile),
+                    ),
                   );
                 },
               ),
@@ -59,15 +95,43 @@ class ProfilePage extends StatelessWidget {
 
 void _showAddProfileDialog(BuildContext context) {
   final _nameController = TextEditingController();
+  DateTime? _selectedSchedule;
 
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
         title: Text('Add Profile'),
-        content: TextField(
-          controller: _nameController,
-          decoration: InputDecoration(labelText: 'Profile Name'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Profile Name'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                final time = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.now(),
+                );
+                if (time != null) {
+                  final now = DateTime.now();
+                  _selectedSchedule = DateTime(
+                    now.year,
+                    now.month,
+                    now.day,
+                    time.hour,
+                    time.minute,
+                  );
+                }
+              },
+              child: Text(_selectedSchedule == null
+                  ? 'Set Test Schedule'
+                  : 'Scheduled at ${TimeOfDay.fromDateTime(_selectedSchedule!).format(context)}'),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -78,8 +142,9 @@ void _showAddProfileDialog(BuildContext context) {
             onPressed: () {
               final name = _nameController.text;
               if (name.isNotEmpty) {
-                Provider.of<UserProvider>(context, listen: false)
-                    .addProfile(name);
+                final userProvider =
+                    Provider.of<UserProvider>(context, listen: false);
+                userProvider.addProfile(name, schedule: _selectedSchedule);
                 Navigator.pop(context);
               }
             },
