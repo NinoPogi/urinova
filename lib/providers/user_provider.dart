@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum AuthStatus { loading, authenticated, unauthenticated }
+
 class UserProvider with ChangeNotifier {
+  AuthStatus _status = AuthStatus.loading;
   User? _user;
   List<Map<String, dynamic>> _profiles = [];
   Map<String, dynamic>? _currentProfile;
@@ -12,15 +15,18 @@ class UserProvider with ChangeNotifier {
   List<Map<String, dynamic>> get profiles => _profiles;
   Map<String, dynamic>? get currentProfile => _currentProfile;
   DateTime? get testSchedule => _testSchedule;
+  AuthStatus get status => _status;
 
   UserProvider() {
-    FirebaseAuth.instance.authStateChanges().listen((user) {
+    FirebaseAuth.instance.authStateChanges().listen((user) async {
       _user = user;
       if (user != null) {
-        _loadProfiles();
+        await _loadProfiles();
+        _status = AuthStatus.authenticated;
       } else {
         _profiles = [];
         _currentProfile = null;
+        _status = AuthStatus.unauthenticated;
       }
       notifyListeners();
     });

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/biomarker_provider.dart';
 
 class RiskAlertCard extends StatefulWidget {
   const RiskAlertCard({super.key});
@@ -10,6 +12,9 @@ class RiskAlertCard extends StatefulWidget {
 class _RiskAlertCardState extends State<RiskAlertCard> {
   @override
   Widget build(BuildContext context) {
+    final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
+    final hasHighRisk = biomarkerProvider.biomarkers.any((value) => value > 3);
+
     return Container(
       padding: EdgeInsets.all(20),
       width: 180,
@@ -26,7 +31,7 @@ class _RiskAlertCardState extends State<RiskAlertCard> {
           ),
         ],
       ),
-      child: Stack(
+      child: Column(
         children: [
           Text(
             'Risk Alert',
@@ -35,6 +40,17 @@ class _RiskAlertCardState extends State<RiskAlertCard> {
               fontWeight: FontWeight.bold,
               fontFamily: 'Work Sans',
               letterSpacing: -1,
+            ),
+          ),
+          Spacer(),
+          Text(
+            hasHighRisk ? 'High Risk Alert!' : 'No Risk Alert',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Work Sans',
+              letterSpacing: -1,
+              color: hasHighRisk ? Colors.red : Colors.green,
             ),
           ),
         ],

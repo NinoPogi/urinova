@@ -29,6 +29,7 @@ class Urinova extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
+          fontFamily: 'Work Sans',
         ),
         debugShowCheckedModeBanner: true,
         home: AuthWrapper(),
@@ -40,15 +41,24 @@ class Urinova extends StatelessWidget {
 class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-
-    if (userProvider.user == null) {
-      return AuthPage();
-    } else if (userProvider.profiles.isEmpty) {
-      return FirstTimeProfileSetup();
-    } else {
-      return Main();
-    }
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        switch (userProvider.status) {
+          case AuthStatus.loading:
+            return Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          case AuthStatus.unauthenticated:
+            return AuthPage();
+          case AuthStatus.authenticated:
+            if (userProvider.profiles.isEmpty) {
+              return FirstTimeProfileSetup();
+            } else {
+              return Main();
+            }
+        }
+      },
+    );
   }
 }
 
