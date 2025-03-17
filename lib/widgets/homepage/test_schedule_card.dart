@@ -48,9 +48,9 @@ class _TestScheduleCardState extends State<TestScheduleCard> {
     final schedule = currentProfile?['testSchedule'];
 
     return Container(
-      padding: EdgeInsets.all(20),
-      width: 180,
-      height: 200,
+      padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
+      width: MediaQuery.of(context).size.width * 0.4,
+      height: MediaQuery.of(context).size.height * 0.20,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
@@ -77,11 +77,6 @@ class _TestScheduleCardState extends State<TestScheduleCard> {
           ),
           Spacer(),
           if (schedule != null) ...[
-            // Text(
-            //   'Next test at ${TimeOfDay.fromDateTime(schedule).format(context)}',
-            //   style: TextStyle(fontSize: 16),
-            // ),
-            // SizedBox(height: 8),
             Text(
               _getTimeRemaining(schedule),
               style: TextStyle(fontSize: 14, color: Colors.grey),

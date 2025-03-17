@@ -1,32 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:urinova/widgets/insights/historical_data_modal.dart';
+import 'package:urinova/widgets/insights/diet_simulation_modal.dart';
 
-class HistoricalDataCard extends StatefulWidget {
-  const HistoricalDataCard({super.key});
+class BiomarkersCard extends StatefulWidget {
+  const BiomarkersCard({super.key});
 
   @override
-  State<HistoricalDataCard> createState() => _HistoricalDataCardState();
+  State<BiomarkersCard> createState() => _BiomarkersCardState();
 }
 
-class _HistoricalDataCardState extends State<HistoricalDataCard> {
+class _BiomarkersCardState extends State<BiomarkersCard> {
   void _showModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => const HistoricalDataModal(),
+      builder: (context) => const DietSimulationModal(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _showModal(context),
+      // onTap: () => _showModal(context),
       child: Container(
         padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
         width: double.infinity,
-        height: MediaQuery.of(context).size.height * 0.18,
+        height: MediaQuery.of(context).size.height * 0.16,
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 255, 162, 82),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(22),
           boxShadow: const [
             BoxShadow(
@@ -40,7 +40,7 @@ class _HistoricalDataCardState extends State<HistoricalDataCard> {
         child: Stack(
           children: [
             Text(
-              'Historical Data 📉',
+              'Biomarkers 🎓',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,

@@ -20,9 +20,8 @@ class _BiomarkerCardState extends State<BiomarkerCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(20),
-      width: 400,
-      height: 80,
+      padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
@@ -34,7 +33,7 @@ class _BiomarkerCardState extends State<BiomarkerCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                widget.name, // Access widget properties
+                widget.name,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -44,7 +43,8 @@ class _BiomarkerCardState extends State<BiomarkerCard> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.05),
                 decoration: BoxDecoration(
                   color: widget.color,
                   borderRadius: BorderRadius.circular(16),

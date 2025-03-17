@@ -16,9 +16,9 @@ class _RiskAlertCardState extends State<RiskAlertCard> {
     final hasHighRisk = biomarkerProvider.biomarkers.any((value) => value > 3);
 
     return Container(
-      padding: EdgeInsets.all(20),
-      width: 180,
-      height: 200,
+      padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
+      width: MediaQuery.of(context).size.width * 0.4,
+      height: MediaQuery.of(context).size.height * 0.20,
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 255, 162, 82),
         borderRadius: BorderRadius.circular(22),

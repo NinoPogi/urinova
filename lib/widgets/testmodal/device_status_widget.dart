@@ -156,7 +156,7 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
         Column(
           children: [
             Container(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.03),
               decoration: BoxDecoration(
                 color: Color.fromARGB(255, 255, 246, 238),
                 borderRadius: BorderRadius.circular(22),
@@ -172,12 +172,12 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                       letterSpacing: -1,
                     ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.01),
                   Row(
                     children: [
                       SizedBox(
-                        height: 120,
-                        width: 135,
+                        height: MediaQuery.of(context).size.height * 0.15,
+                        width: MediaQuery.of(context).size.width * 0.35,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.asset(
@@ -186,7 +186,7 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 20),
+                      SizedBox(width: MediaQuery.of(context).size.width * 0.05),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -201,7 +201,9 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.01),
                           Row(
                             children: [
                               Text(
@@ -213,7 +215,9 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 12),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.015),
                           ElevatedButton(
                             onPressed: () {
                               if (_isConnected) {
@@ -228,8 +232,12 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   _isConnected ? Colors.green : Colors.blue,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 12),
+                              padding: EdgeInsets.symmetric(
+                                horizontal:
+                                    MediaQuery.of(context).size.width * 0.03,
+                                vertical:
+                                    MediaQuery.of(context).size.height * 0.015,
+                              ),
                             ),
                             child: _isScanning
                                 ? const CircularProgressIndicator(
@@ -246,15 +254,17 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                 ],
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.01),
             ElevatedButton(
               onPressed: _isConnected && !_isSending ? _sendData : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _isSending
                     ? Colors.grey
                     : (_isConnected ? Colors.orange : Colors.grey),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 100, vertical: 12),
+                padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.25,
+                  vertical: MediaQuery.of(context).size.height * 0.015,
+                ),
               ),
               child: _isSending
                   ? const Text("Testing...", style: TextStyle(fontSize: 18))

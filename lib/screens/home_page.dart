@@ -22,33 +22,39 @@ class HomePage extends StatelessWidget {
     }
 
     final List<Map<String, dynamic>> biomarkers = hasHistory
-        ? biomarkerProvider.biomarkers.asMap().entries.map((entry) {
-            final index = entry.key;
-            final value = entry.value;
-            final validValue = value < biomarkerValues[index].length
-                ? value
-                : biomarkerValues[index].length - 1;
-            final color = getSeverityColor(validValue);
-            return {
-              "name": biomarkerNames[index],
-              "value": biomarkerValues[index][validValue],
-              "color": color,
-            };
-          }).toList()
+        ? biomarkerProvider.biomarkers.asMap().entries.map(
+            (entry) {
+              final index = entry.key;
+              final value = entry.value;
+              final validValue = value < biomarkerValues[index].length
+                  ? value
+                  : biomarkerValues[index].length - 1;
+              final color = getSeverityColor(validValue);
+              return {
+                "name": biomarkerNames[index],
+                "value": biomarkerValues[index][validValue],
+                "color": color,
+              };
+            },
+          ).toList()
         : [];
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 246, 238),
       body: ListView(
-        padding: EdgeInsets.only(top: 56, left: 25, right: 25),
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).size.height * 0.07,
+          left: MediaQuery.of(context).size.width * 0.06,
+          right: MediaQuery.of(context).size.width * 0.06,
+        ),
         children: [
           HeaderPart(name: "Hello, 👋"),
-          SizedBox(height: 100),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               TestScheduleCard(),
-              SizedBox(width: 5),
+              SizedBox(width: MediaQuery.of(context).size.width * 0.01),
               RiskAlertCard(),
             ],
           ),
@@ -60,25 +66,26 @@ class HomePage extends StatelessWidget {
               maxWidth: MediaQuery.of(context).size.width,
               child: Container(
                 width: double.infinity,
-                height: 20,
                 decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(42))),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(42)),
+                ),
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.01),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 75,
-                        height: 6,
+                        width: MediaQuery.of(context).size.width * 0.2,
+                        height: MediaQuery.of(context).size.height * 0.008,
                         decoration: BoxDecoration(
                           color: Colors.grey,
                           borderRadius: BorderRadius.circular(22),
                         ),
                       ),
-                      SizedBox(height: 28),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.03),
                       Text(
                         'Recent Biomarkers Summary',
                         style: TextStyle(
@@ -88,33 +95,36 @@ class HomePage extends StatelessWidget {
                           letterSpacing: -1,
                         ),
                       ),
-                      SizedBox(height: 22),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.02),
                       hasHistory
-                          ? Column(
-                              children: biomarkers
-                                  .map((b) => Padding(
-                                        padding: const EdgeInsets.only(
-                                            bottom: 12.0), // Add spacing
-                                        child: BiomarkerCard(
-                                          name: b["name"],
-                                          value: b["value"],
-                                          color: b["color"],
-                                        ),
-                                      ))
-                                  .toList(),
-                            )
-                          : Column(
-                              children: [
-                                Text(
-                                  "Conduct test first",
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontFamily: 'Work Sans',
-                                    letterSpacing: -1,
+                          ? ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: biomarkers.length,
+                              itemBuilder: (context, index) {
+                                final b = biomarkers[index];
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom:
+                                          MediaQuery.of(context).size.height *
+                                              0.015),
+                                  child: BiomarkerCard(
+                                    name: b["name"],
+                                    value: b["value"],
+                                    color: b["color"],
                                   ),
-                                )
-                              ],
+                                );
+                              },
                             )
+                          : Text(
+                              "Conduct test first",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontFamily: 'Work Sans',
+                                letterSpacing: -1,
+                              ),
+                            ),
                     ],
                   ),
                 ),

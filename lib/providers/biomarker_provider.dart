@@ -8,6 +8,8 @@ class BiomarkerProvider with ChangeNotifier {
   List<int> get biomarkers => _biomarkers;
   List<List<int>> get history => _history;
 
+  get biomarkerHistory => null;
+
   void updateBiomarkers(List<int> newBiomarkers) {
     _biomarkers = newBiomarkers;
     _history.add(List.from(newBiomarkers));

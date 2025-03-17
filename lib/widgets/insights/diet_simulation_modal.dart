@@ -113,16 +113,23 @@ class _DietSimulationModalState extends State<DietSimulationModal> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(60),
+      padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Diet Simulation',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          Text(
+            'Diet Simulation',
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: MediaQuery.of(context).size.width * 0.02),
           DropdownButton<String>(
             value: _selectedDiet,
-            hint: Text('Select Diet'),
+            hint: const Text('Select Diet'),
+            isExpanded: true,
             items: _dietEffects.keys.map((String value) {
               return DropdownMenuItem<String>(
                 value: value,
@@ -131,9 +138,11 @@ class _DietSimulationModalState extends State<DietSimulationModal> {
             }).toList(),
             onChanged: _onDietChanged,
           ),
+          SizedBox(height: MediaQuery.of(context).size.width * 0.02),
           DropdownButton<String>(
             value: _selectedDuration,
-            hint: Text('Select Duration'),
+            hint: const Text('Select Duration'),
+            isExpanded: true,
             items: ['short', 'medium', 'long'].map((String value) {
               return DropdownMenuItem<String>(
                 value: value,
@@ -142,9 +151,10 @@ class _DietSimulationModalState extends State<DietSimulationModal> {
             }).toList(),
             onChanged: _onDurationChanged,
           ),
+          SizedBox(height: MediaQuery.of(context).size.width * 0.02),
           ElevatedButton(
             onPressed: _runSimulation,
-            child: Text('Run Simulation'),
+            child: const Text('Run Simulation'),
           ),
           if (_showResults)
             Expanded(
@@ -164,19 +174,21 @@ class _DietSimulationModalState extends State<DietSimulationModal> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Value: ${biomarkerValues[index][value]}'),
-                          Text('Trend: ${_getTrend(index)}',
-                              style: TextStyle(
-                                color: _getTrend(index).contains('↑')
-                                    ? Colors.red
-                                    : _getTrend(index).contains('↓')
-                                        ? Colors.green
-                                        : Colors.grey,
-                              )),
+                          Text(
+                            'Trend: ${_getTrend(index)}',
+                            style: TextStyle(
+                              color: _getTrend(index).contains('↑')
+                                  ? Colors.red
+                                  : _getTrend(index).contains('↓')
+                                      ? Colors.green
+                                      : Colors.grey,
+                            ),
+                          ),
                         ],
                       ),
                       trailing: Container(
-                        width: 20,
-                        height: 20,
+                        width: MediaQuery.of(context).size.width * 0.05,
+                        height: MediaQuery.of(context).size.width * 0.05,
                         color: color,
                       ),
                     ),

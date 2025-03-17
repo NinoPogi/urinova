@@ -22,9 +22,9 @@ class _DietSimulationCardState extends State<DietSimulationCard> {
     return GestureDetector(
       onTap: () => _showModal(context),
       child: Container(
-        padding: EdgeInsets.all(20),
-        width: 420,
-        height: 200,
+        padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
+        width: double.infinity,
+        height: MediaQuery.of(context).size.height * 0.18,
         decoration: BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.circular(22),
