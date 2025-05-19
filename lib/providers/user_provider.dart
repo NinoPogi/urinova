@@ -9,12 +9,12 @@ class UserProvider with ChangeNotifier {
   User? _user;
   List<Map<String, dynamic>> _profiles = [];
   Map<String, dynamic>? _currentProfile;
-  DateTime? _testSchedule;
+  Map<String, dynamic>? _testSchedule;
 
   User? get user => _user;
   List<Map<String, dynamic>> get profiles => _profiles;
   Map<String, dynamic>? get currentProfile => _currentProfile;
-  DateTime? get testSchedule => _testSchedule;
+  Map<String, dynamic>? get testSchedule => _testSchedule;
   AuthStatus get status => _status;
 
   UserProvider() {
@@ -37,9 +37,26 @@ class UserProvider with ChangeNotifier {
         .signInWithEmailAndPassword(email: email, password: password);
   }
 
-  Future<void> signup(String email, String password) async {
-    await FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email, password: password);
+  Future<void> signup(String email, String password, {String? gender}) async {
+    final userCredential =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email.trim(),
+      password: password.trim(),
+    );
+
+    final uid = userCredential.user?.uid;
+    if (uid == null) {
+      throw FirebaseAuthException(
+        code: 'MISSING-UID',
+        message: 'Could not get UID after signup.',
+      );
+    }
+
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'email': email.trim(),
+      'gender': gender ?? 'unspecified',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
   }
 
   Future<void> logout() async {
@@ -57,8 +74,9 @@ class UserProvider with ChangeNotifier {
       final data = doc.data();
       return {
         'id': doc.id,
+        'gender': data['gender'],
         'name': data['name'],
-        'testSchedule': data['testSchedule']?.toDate(),
+        'testSchedule': data['testSchedule'],
         'createdAt': data['createdAt'],
       };
     }).toList();
@@ -68,10 +86,12 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addProfile(String name, {DateTime? schedule}) async {
+  Future<void> addProfile(String name,
+      {Map<String, dynamic>? schedule, String? gender, required}) async {
     if (_user == null) return;
     final profileData = {
       'name': name,
+      'gender': gender,
       'createdAt': Timestamp.now(),
       'testSchedule': schedule,
     };
@@ -105,7 +125,8 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setTestSchedule(String profileId, DateTime? schedule) async {
+  Future<void> setTestSchedule(
+      String profileId, Map<String, dynamic>? schedule) async {
     if (_user == null) return;
     await FirebaseFirestore.instance
         .collection('users')

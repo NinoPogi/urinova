@@ -5,7 +5,9 @@ import 'package:urinova/widgets/insights/diet_simulation_card.dart';
 import 'package:urinova/widgets/insights/historical_data_card.dart';
 
 class InsightsPage extends StatelessWidget {
-  const InsightsPage({super.key});
+  final VoidCallback onNavigateToProfile;
+
+  const InsightsPage({super.key, required this.onNavigateToProfile});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +20,8 @@ class InsightsPage extends StatelessWidget {
           right: MediaQuery.of(context).size.width * 0.06,
         ),
         children: [
-          HeaderPart(name: "Insights 💡"),
+          HeaderPart(
+              name: "Insights 💡", onNavigateToProfile: onNavigateToProfile),
           SizedBox(height: MediaQuery.of(context).size.height * 0.12),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

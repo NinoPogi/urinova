@@ -6,14 +6,42 @@ import 'package:urinova/widgets/header_part.dart';
 import 'package:urinova/widgets/homepage/test_schedule_card.dart';
 import 'package:urinova/widgets/homepage/risk_alert_card.dart';
 import 'package:urinova/widgets/homepage/biomarker_card.dart';
+import 'dart:math';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final VoidCallback onNavigateToProfile;
+
+  const HomePage({super.key, required this.onNavigateToProfile});
+
+  static String _getMessage() {
+    final hour = DateTime.now().hour;
+    final random = Random();
+    if (hour < 12) {
+      return [
+        'Good morning! ☀️',
+        'Rise and shine! 🌞',
+        'Hello, 👋'
+      ][random.nextInt(3)];
+    } else if (hour < 17) {
+      return [
+        'Good afternoon! 🌤️',
+        'Hi there! ☀️',
+        'Greetings! 😊'
+      ][random.nextInt(3)];
+    } else {
+      return [
+        'Good evening! 🌙',
+        'Hello, 🌃',
+        'Welcome back! ⭐'
+      ][random.nextInt(3)];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
     final hasHistory = biomarkerProvider.history.isNotEmpty;
+    final randomMessage = _getMessage();
 
     Color getSeverityColor(int value) {
       if (value <= 1) return Colors.green;
@@ -48,7 +76,8 @@ class HomePage extends StatelessWidget {
           right: MediaQuery.of(context).size.width * 0.06,
         ),
         children: [
-          HeaderPart(name: "Hello, 👋"),
+          HeaderPart(
+              name: randomMessage, onNavigateToProfile: onNavigateToProfile),
           SizedBox(height: MediaQuery.of(context).size.height * 0.12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

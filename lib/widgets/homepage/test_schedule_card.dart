@@ -10,35 +10,69 @@ class TestScheduleCard extends StatefulWidget {
 }
 
 class _TestScheduleCardState extends State<TestScheduleCard> {
-  Future<void> _selectTime(BuildContext context) async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final currentProfile = userProvider.currentProfile;
-    if (currentProfile == null) return;
+  DateTime? getNextScheduleTime(Map<String, dynamic>? schedule) {
+    if (schedule == null) return null;
 
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (time != null) {
-      final now = DateTime.now();
-      final schedule = DateTime(
+    final frequency = schedule['frequency'];
+    final hour = schedule['hour'] as int;
+    final minute = schedule['minute'] as int;
+
+    final now = DateTime.now();
+    DateTime nextTime = DateTime(now.year, now.month, now.day, hour, minute);
+
+    // For daily schedules: if time has passed today, move to tomorrow
+    if (frequency == 'daily') {
+      if (nextTime.isBefore(now)) {
+        nextTime = nextTime.add(const Duration(days: 1));
+      }
+      return nextTime;
+    } else if (frequency == 'weekly') {
+      final days = schedule['days'] as List<dynamic>;
+      if (days.isEmpty) return null;
+      final dayMap = {
+        'Mon': 1,
+        'Tue': 2,
+        'Wed': 3,
+        'Thu': 4,
+        'Fri': 5,
+        'Sat': 6,
+        'Sun': 7,
+      };
+      final targetWeekdays = days.map((d) => dayMap[d]!).toList();
+      int daysToAdd = 0;
+      for (int i = 0; i < 7; i++) {
+        final candidate = now.add(Duration(days: i));
+        if (targetWeekdays.contains(candidate.weekday)) {
+          daysToAdd = i;
+          break;
+        }
+      }
+      nextTime = DateTime(
         now.year,
         now.month,
-        now.day,
-        time.hour,
-        time.minute,
+        now.day + daysToAdd,
+        hour,
+        minute,
       );
-      await userProvider.setTestSchedule(currentProfile['id'], schedule);
+      if (nextTime.isBefore(now)) {
+        nextTime = nextTime.add(Duration(days: 7));
+      }
+    } else {
+      return null;
     }
+    return nextTime;
   }
 
-  String _getTimeRemaining(DateTime schedule) {
+  String _getTimeRemaining(DateTime? nextTime) {
+    if (nextTime == null) return 'No schedule set';
     final now = DateTime.now();
-    final difference = schedule.difference(now);
+    final difference = nextTime.difference(now);
     if (difference.isNegative) {
-      return 'Time passed';
+      return 'Scheduled time passed';
     }
-    return ' ETA: ${difference.inHours}h ${difference.inMinutes.remainder(60)}m';
+    final hours = difference.inHours;
+    final minutes = difference.inMinutes.remainder(60);
+    return 'Next test in $hours h $minutes m';
   }
 
   @override
@@ -46,6 +80,7 @@ class _TestScheduleCardState extends State<TestScheduleCard> {
     final userProvider = Provider.of<UserProvider>(context);
     final currentProfile = userProvider.currentProfile;
     final schedule = currentProfile?['testSchedule'];
+    final nextTime = getNextScheduleTime(schedule);
 
     return Container(
       padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
@@ -76,17 +111,10 @@ class _TestScheduleCardState extends State<TestScheduleCard> {
             ),
           ),
           Spacer(),
-          if (schedule != null) ...[
-            Text(
-              _getTimeRemaining(schedule),
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-          ] else
-            ElevatedButton(
-              onPressed: () => _selectTime(context),
-              child:
-                  Text(schedule == null ? 'Set Schedule' : 'Change Schedule'),
-            ),
+          Text(
+            _getTimeRemaining(nextTime),
+            style: TextStyle(fontSize: 14, color: Colors.grey),
+          ),
         ],
       ),
     );

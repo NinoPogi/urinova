@@ -6,7 +6,9 @@ import 'package:urinova/widgets/header_part.dart';
 import 'package:urinova/widgets/recommend/recommendation_modal.dart';
 
 class RecommendPage extends StatelessWidget {
-  const RecommendPage({super.key});
+  final VoidCallback onNavigateToProfile;
+
+  const RecommendPage({super.key, required this.onNavigateToProfile});
 
   void _showRecommendationModal(BuildContext context) {
     showModalBottomSheet(
@@ -57,9 +59,9 @@ class RecommendPage extends StatelessWidget {
         child: Column(
           children: [
             HeaderPart(
-              name: 'Your Personalized 👹\n Recommendations',
-              fontSize: 18,
-            ),
+                name: 'Your Personalized ⛑️\n Recommendations',
+                fontSize: 18,
+                onNavigateToProfile: onNavigateToProfile),
             SizedBox(height: MediaQuery.of(context).size.height * 0.09),
             Expanded(
               child: Container(

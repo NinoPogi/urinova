@@ -39,6 +39,8 @@ class Urinova extends StatelessWidget {
 }
 
 class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Consumer<UserProvider>(
@@ -63,20 +65,33 @@ class AuthWrapper extends StatelessWidget {
 }
 
 class FirstTimeProfileSetup extends StatefulWidget {
+  const FirstTimeProfileSetup({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _FirstTimeProfileSetupState createState() => _FirstTimeProfileSetupState();
 }
 
 class _FirstTimeProfileSetupState extends State<FirstTimeProfileSetup> {
   final _nameController = TextEditingController();
+  String? _selectedGender;
 
   Future<void> _completeSetup() async {
-    if (_nameController.text.isNotEmpty) {
-      await Provider.of<UserProvider>(context, listen: false)
-          .addProfile(_nameController.text);
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => Main()));
+    final name = _nameController.text.trim();
+    if (name.isEmpty || _selectedGender == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a name and select a gender')),
+      );
+      return;
     }
+
+    Provider.of<UserProvider>(context, listen: false)
+        .addProfile(name, gender: _selectedGender);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => Main()),
+    );
   }
 
   @override
@@ -92,6 +107,20 @@ class _FirstTimeProfileSetupState extends State<FirstTimeProfileSetup> {
               child: TextField(
                 controller: _nameController,
                 decoration: InputDecoration(labelText: 'Profile Name'),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: DropdownButtonFormField<String>(
+                value: _selectedGender,
+                decoration: InputDecoration(labelText: 'Gender'),
+                items: ['Male', 'Female']
+                    .map((g) => DropdownMenuItem(
+                          value: g,
+                          child: Text(g),
+                        ))
+                    .toList(),
+                onChanged: (v) => setState(() => _selectedGender = v),
               ),
             ),
             ElevatedButton(
@@ -115,12 +144,24 @@ class Main extends StatefulWidget {
 
 class _MainState extends State<Main> {
   int _currentIndex = 0;
-  final List<Widget> _pages = const [
-    HomePage(),
-    RecommendPage(),
-    InsightsPage(),
-    ProfilePage(),
-  ];
+  late List<Widget> _pages;
+
+  void _navigateToProfile() {
+    setState(() {
+      _currentIndex = 3; // Index of ProfilePage
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      HomePage(onNavigateToProfile: _navigateToProfile),
+      RecommendPage(onNavigateToProfile: _navigateToProfile),
+      InsightsPage(onNavigateToProfile: _navigateToProfile),
+      ProfilePage(),
+    ];
+  }
 
   void _showModal(BuildContext context) {
     showModalBottomSheet(
