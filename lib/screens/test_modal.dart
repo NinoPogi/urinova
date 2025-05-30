@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:urinova/constants/biomarker_constant.dart';
 import 'package:urinova/providers/biomarker_provider.dart';
+import 'package:urinova/providers/user_provider.dart';
 import 'package:urinova/widgets/testmodal/device_status_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:urinova/widgets/testmodal/profile_time_widget.dart';
 
 class TestBottomSheet extends StatefulWidget {
   const TestBottomSheet({super.key});
@@ -25,7 +28,27 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
     });
   }
 
-  void _onConfirm() {
+  void _onConfirm() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final biomarkerProvider =
+        Provider.of<BiomarkerProvider>(context, listen: false);
+    final currentProfile = userProvider.currentProfile;
+    if (currentProfile != null) {
+      final profileId = currentProfile['id'];
+      final userId = userProvider.user!.uid;
+      final biomarkers = biomarkerProvider.biomarkers;
+      final testData = {
+        'date': Timestamp.now(),
+        'biomarkers': biomarkers,
+      };
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('profiles')
+          .doc(profileId)
+          .collection('tests')
+          .add(testData);
+    }
     Navigator.of(context).pop();
     setState(() {
       _showSummary = false;
@@ -39,9 +62,9 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
     return Container(
       color: Colors.transparent,
       child: DraggableScrollableSheet(
-        initialChildSize: 0.81,
-        minChildSize: 0.7,
-        maxChildSize: 0.81,
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.6,
         builder: (BuildContext context, ScrollController scrollController) {
           return Material(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
@@ -61,6 +84,8 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
                           color: Colors.white,
                         ),
                       ),
+                      const SizedBox(height: 60),
+                      buildProfileAndTestTimeCard(context),
                       const SizedBox(height: 16),
                       ...biomarkerProvider.biomarkers
                           .asMap()
@@ -106,7 +131,7 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
                   )
                 : ListView(
                     controller: scrollController,
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(20.0),
                     children: [
                       const Text(
                         'Test Now 🚽',
@@ -117,6 +142,9 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
                           color: Colors.white,
                         ),
                       ),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.1),
+                      buildProfileAndTestTimeCard(context),
                       const SizedBox(height: 16),
                       DeviceStatusWidget(onTestComplete: _onTestComplete),
                     ],

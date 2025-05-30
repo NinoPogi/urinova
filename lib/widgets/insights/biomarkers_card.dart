@@ -46,6 +46,7 @@ class _BiomarkersCardState extends State<BiomarkersCard> {
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Work Sans',
                 letterSpacing: -1,
+                decoration: TextDecoration.lineThrough,
               ),
             ),
           ],

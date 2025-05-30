@@ -68,7 +68,7 @@ class HomePage extends StatelessWidget {
         : [];
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 246, 238),
+      backgroundColor: const Color.fromARGB(255, 161, 210, 206),
       body: ListView(
         padding: EdgeInsets.only(
           top: MediaQuery.of(context).size.height * 0.07,

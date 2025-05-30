@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:urinova/constants/biomarker_constant.dart';
 
@@ -10,9 +11,47 @@ class BiomarkerProvider with ChangeNotifier {
 
   get biomarkerHistory => null;
 
+  Future<void> loadHistoryForProfile(String userId, String profileId) async {
+    try {
+      final testsSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('profiles')
+          .doc(profileId)
+          .collection('tests')
+          .orderBy('date')
+          .get();
+
+      _history = testsSnapshot.docs.map((doc) {
+        final data = doc.data();
+        return List<int>.from(data['biomarkers']);
+      }).toList();
+
+      if (_history.isNotEmpty) {
+        _biomarkers = _history.last;
+      } else {
+        _biomarkers = [];
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print('Error loading history: $e');
+      _history = [];
+      _biomarkers = [];
+      notifyListeners();
+    }
+  }
+
   void updateBiomarkers(List<int> newBiomarkers) {
-    _biomarkers = newBiomarkers;
-    _history.add(List.from(newBiomarkers));
+    const int expectedLength = 7;
+    if (newBiomarkers.length != expectedLength) {
+      print(
+          'Warning: Received ${newBiomarkers.length} biomarkers, expected $expectedLength');
+    }
+    _biomarkers = newBiomarkers.take(expectedLength).toList();
+    while (_biomarkers.length < expectedLength) {
+      _biomarkers.add(0);
+    }
     notifyListeners();
   }
 
@@ -54,6 +93,12 @@ class BiomarkerProvider with ChangeNotifier {
       }
     }
 
-    return finalAdvice.entries.map((e) => "${e.key}: ${e.value}").toList();
+    if (finalAdvice.isEmpty) {
+      return [
+        "All your biomarkers are within normal ranges. Continue maintaining a healthy lifestyle!"
+      ];
+    } else {
+      return finalAdvice.entries.map((e) => "${e.key}: ${e.value}").toList();
+    }
   }
 }

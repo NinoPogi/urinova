@@ -37,7 +37,7 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
 
     await FlutterBluePlus.startScan(
       timeout: const Duration(seconds: 4),
-      withNames: ["ESP32"],
+      withNames: ["Urinova"],
     );
 
     var subscription = FlutterBluePlus.onScanResults.listen((results) async {
@@ -70,6 +70,10 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                   if (mounted) {
                     Provider.of<BiomarkerProvider>(context, listen: false)
                         .updateBiomarkers(firstBytes);
+                  }
+
+                  if (received.isNotEmpty && received[0] == 0x02) {
+                    widget.onTestComplete();
                   }
                 });
               }
@@ -138,7 +142,7 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
       setState(() {
         _isSending = false;
       });
-      widget.onTestComplete();
+      // widget.onTestComplete();
     }
   }
 
@@ -172,7 +176,7 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                       letterSpacing: -1,
                     ),
                   ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                   Row(
                     children: [
                       SizedBox(
@@ -190,31 +194,31 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Battery: $_batteryLevel%',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: _getLevelColor(_batteryLevel),
-                                ),
-                              ),
-                            ],
-                          ),
+                          // Row(
+                          //   children: [
+                          //     Text(
+                          //       'Battery: $_batteryLevel%',
+                          //       style: TextStyle(
+                          //         fontSize: 14,
+                          //         color: _getLevelColor(_batteryLevel),
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.01),
-                          Row(
-                            children: [
-                              Text(
-                                'Urine Level: $_urineLevel%',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: _getLevelColor(_urineLevel),
-                                ),
-                              ),
-                            ],
-                          ),
+                          // Row(
+                          //   children: [
+                          //     Text(
+                          //       'Urine Level: $_urineLevel%',
+                          //       style: TextStyle(
+                          //         fontSize: 14,
+                          //         color: _getLevelColor(_urineLevel),
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.015),

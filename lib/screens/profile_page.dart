@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:urinova/providers/biomarker_provider.dart';
 import 'package:urinova/providers/user_provider.dart';
 import 'package:urinova/screens/auth_page.dart';
 import 'package:urinova/widgets/profile/manage_profiles_modal.dart';
@@ -33,7 +34,7 @@ class ProfilePage extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 246, 238),
+      backgroundColor: const Color.fromARGB(255, 161, 210, 206),
       body: Padding(
         padding: const EdgeInsets.only(top: 100, left: 25, right: 25),
         child: Column(
@@ -50,7 +51,14 @@ class ProfilePage extends StatelessWidget {
                   return ListTile(
                     title: Text(profile['name']),
                     trailing: const Icon(Icons.arrow_forward),
-                    onTap: () => userProvider.setCurrentProfile(profile),
+                    onTap: () {
+                      userProvider.setCurrentProfile(profile);
+                      final biomarkerProvider = Provider.of<BiomarkerProvider>(
+                          context,
+                          listen: false);
+                      biomarkerProvider.loadHistoryForProfile(
+                          userProvider.user!.uid, profile['id']);
+                    },
                   );
                 },
               ),

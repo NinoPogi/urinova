@@ -69,7 +69,9 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/images/device.gif
-    - assets/images/profile.png
+    - assets/images/profile.gif
+    - assets/images/load_dip_test.gif
+    - assets/images/urine_loading.gif
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

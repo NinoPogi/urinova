@@ -84,10 +84,14 @@ class _FirstTimeProfileSetupState extends State<FirstTimeProfileSetup> {
       );
       return;
     }
-
-    Provider.of<UserProvider>(context, listen: false)
-        .addProfile(name, gender: _selectedGender);
-
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await userProvider.addProfile(name, gender: _selectedGender);
+    final newProfile = userProvider.profiles.last;
+    userProvider.setCurrentProfile(newProfile);
+    final biomarkerProvider =
+        Provider.of<BiomarkerProvider>(context, listen: false);
+    await biomarkerProvider.loadHistoryForProfile(
+        userProvider.user!.uid, newProfile['id']);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => Main()),
