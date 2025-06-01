@@ -19,7 +19,6 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
   BluetoothDevice? _connectedDevice;
   bool _isConnected = false;
   bool _isScanning = false;
-  bool _isSending = false;
   int _liquidLevel = 0; // Mock value
 
   @override
@@ -53,6 +52,26 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
     return true;
   }
 
+  Future<void> _sendCommand(int command) async {
+    if (_connectedDevice == null || !_isConnected) return;
+    List<BluetoothService> services =
+        await _connectedDevice!.discoverServices();
+    for (BluetoothService service in services) {
+      for (BluetoothCharacteristic c in service.characteristics) {
+        if (c.characteristicUuid.toString() == dotenv.env['BLE_WRITE']) {
+          await c.write([command], timeout: 180);
+          break;
+        }
+      }
+    }
+  }
+
+  void _startScanning() async {
+    if (_connectedDevice == null || !_isConnected || _isScanning) return;
+    setState(() => _isScanning = true);
+    await _sendCommand(0x03);
+  }
+
   void _startScanAndConnect() async {
     if (_isScanning) return;
     setState(() => _isScanning = true);
@@ -71,16 +90,17 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
               c.onValueReceived.listen((received) {
                 if (received.isEmpty) return;
                 int dataType = received[0];
-                if (dataType == 0x02) {
+                if (dataType == 0x02 && received.length >= 2) {
+                  setState(() => _liquidLevel = received[1]);
+                } else if (dataType == 0x04 && received.length >= 11) {
+                  List<int> biomarkers = received.sublist(1, 11);
+                  Provider.of<BiomarkerProvider>(context, listen: false)
+                      .updateBiomarkers(biomarkers);
+                } else if (dataType == 0x05) {
                   setState(() {
                     _isScanning = false;
                     _currentStep = 4;
                   });
-                } else if (dataType == 0x03) {
-                  if (received.length >= 2) {
-                    int waterLevel = received[1];
-                    setState(() => _liquidLevel = waterLevel);
-                  }
                 }
               });
             }
@@ -102,25 +122,6 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
     Future.delayed(const Duration(seconds: 5), () {
       if (!_isConnected && mounted) setState(() => _isScanning = false);
     });
-  }
-
-  void _startScanning() async {
-    if (_connectedDevice == null || !_isConnected || _isSending) return;
-    setState(() {
-      _isScanning = true;
-      _isSending = true;
-    });
-    List<BluetoothService> services =
-        await _connectedDevice!.discoverServices();
-    for (BluetoothService service in services) {
-      for (BluetoothCharacteristic c in service.characteristics) {
-        if (c.characteristicUuid.toString() == dotenv.env['BLE_WRITE']) {
-          await c.write([0x01], timeout: 180);
-          break;
-        }
-      }
-    }
-    setState(() => _isSending = false);
   }
 
   void _onConfirm() async {
@@ -282,8 +283,11 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
                         SizedBox(width: 100),
                       if (_currentStep < 3)
                         ElevatedButton(
-                          onPressed: () {
-                            if (_canGoNext()) setState(() => _currentStep++);
+                          onPressed: () async {
+                            if (_canGoNext()) {
+                              if (_currentStep == 2) await _sendCommand(0x01);
+                              setState(() => _currentStep++);
+                            }
                           },
                           child: Text('Next'),
                         )
