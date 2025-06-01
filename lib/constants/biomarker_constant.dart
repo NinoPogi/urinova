@@ -1,19 +1,19 @@
 const List<String> biomarkerNames = [
-  // "Leukocytes",
-  // "Nitrites",
+  "Leukocytes",
+  "Nitrites",
   "Urobilinogen",
   "Protein",
   "pH",
   "Blood",
   "Specific Gravity",
   "Ketones",
-  // "Bilirubin",
+  "Bilirubin",
   "Glucose",
 ];
 
 const List<List<String>> biomarkerValues = [
-  // ["Negative (-)", "15 ±", "70+", "125++", "500+++"], // Leukocytes
-  // ["Negative (-)", "Positive (+)"], // Nitrites
+  ["Negative (-)", "15 ±", "70+", "125++", "500+++"], // Leukocytes
+  ["Negative (-)", "Positive (+)"], // Nitrites
   [
     "0 (3.5)",
     "1 (17)",
@@ -49,7 +49,7 @@ const List<List<String>> biomarkerValues = [
     "80 (8.0)",
     "160 (16)"
   ], // Ketones
-  // ["Negative (-)", "1 (17)+", "2 (35)++", "4 (70)+++"], // Bilirubin
+  ["Negative (-)", "1 (17)+", "2 (35)++", "4 (70)+++"], // Bilirubin
   [
     "Negative (-)",
     "100 (5)",

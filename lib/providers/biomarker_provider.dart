@@ -43,7 +43,7 @@ class BiomarkerProvider with ChangeNotifier {
   }
 
   void updateBiomarkers(List<int> newBiomarkers) {
-    const int expectedLength = 7;
+    const int expectedLength = 10;
     if (newBiomarkers.length != expectedLength) {
       print(
           'Warning: Received ${newBiomarkers.length} biomarkers, expected $expectedLength');
