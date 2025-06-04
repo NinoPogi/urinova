@@ -19,6 +19,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
     final currentProfile = userProvider.currentProfile;
     final profiles = userProvider.profiles;
 
@@ -26,65 +27,71 @@ class ProfilePage extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    Widget avatarWidget;
-    if (profiles.length == 1) {
-      avatarWidget = _buildSingleProfileAvatar(currentProfile);
-    } else {
-      avatarWidget = _buildStackedAvatars(profiles, currentProfile);
-    }
+    Widget avatarWidget = profiles.length == 1
+        ? _buildSingleProfileAvatar(currentProfile)
+        : _buildStackedAvatars(profiles, currentProfile);
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 161, 210, 206),
-      body: Padding(
-        padding: const EdgeInsets.only(top: 100, left: 25, right: 25),
-        child: Column(
-          children: [
-            Center(
-              child: avatarWidget,
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: userProvider.profiles.length,
-                itemBuilder: (context, index) {
-                  final profile = userProvider.profiles[index];
-                  return ListTile(
-                    title: Text(profile['name']),
-                    trailing: const Icon(Icons.arrow_forward),
-                    onTap: () {
-                      userProvider.setCurrentProfile(profile);
-                      final biomarkerProvider = Provider.of<BiomarkerProvider>(
-                          context,
-                          listen: false);
-                      biomarkerProvider.loadHistoryForProfile(
-                          userProvider.user!.uid, profile['id']);
-                    },
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(25, 32, 25, 25),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(child: avatarWidget),
+              const SizedBox(height: 20),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: profiles.length,
+                  itemBuilder: (context, index) {
+                    final profile = profiles[index];
+                    final isSelected = profile == currentProfile;
+                    return Container(
+                      color: isSelected ? Colors.blue.withOpacity(0.1) : null,
+                      child: ListTile(
+                        leading: isSelected
+                            ? Icon(Icons.check, color: Colors.blue)
+                            : null,
+                        title: Text(profile['name']),
+                        trailing:
+                            biomarkerProvider.loadingProfileId == profile['id']
+                                ? CircularProgressIndicator()
+                                : Icon(Icons.arrow_forward),
+                        onTap: () {
+                          userProvider.setCurrentProfile(profile);
+                          biomarkerProvider.loadHistoryForProfile(
+                              userProvider.user!.uid, profile['id']);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => _showManageProfilesModal(context),
+                child: const Text('Manage Profiles'),
+              ),
+              const SizedBox(height: 10),
+              // ElevatedButton(
+              //   onPressed: _exportData,
+              //   child: const Text('Export Data'),
+              // ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () async {
+                  await userProvider.logout();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => AuthPage()),
+                    (route) => false,
                   );
                 },
+                child: const Text('Logout'),
               ),
-            ),
-            ElevatedButton(
-              onPressed: () => _showManageProfilesModal(context),
-              child: const Text('Manage Profiles'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Functionality to be added later
-              },
-              child: const Text('Export Data'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await userProvider.logout();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => AuthPage()),
-                  (route) => false,
-                );
-              },
-              child: const Text('Logout'),
-            ),
-          ],
+              const SizedBox(height: 60),
+            ],
+          ),
         ),
       ),
     );
@@ -112,7 +119,6 @@ class ProfilePage extends StatelessWidget {
   Widget _buildStackedAvatars(List<Map<String, dynamic>> profiles,
       Map<String, dynamic> currentProfile) {
     final otherProfiles = profiles.where((p) => p != currentProfile).toList();
-
     return GestureDetector(
       child: SizedBox(
         width: 40.0 + otherProfiles.length * 15.0,
@@ -159,12 +165,8 @@ class ProfilePage extends StatelessWidget {
   }
 
   Color _getAvatarColor(String? gender) {
-    if (gender == 'Male') {
-      return Colors.blue;
-    } else if (gender == 'Female') {
-      return Colors.pink;
-    } else {
-      return Colors.grey; // Fallback color if gender is unspecified
-    }
+    if (gender == 'Male') return Colors.blue;
+    if (gender == 'Female') return Colors.pink;
+    return Colors.grey;
   }
 }

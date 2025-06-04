@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:urinova/constants/biomarker_constant.dart';
 import 'package:urinova/providers/biomarker_provider.dart';
 import 'package:urinova/widgets/header_part.dart';
+import 'package:urinova/widgets/homepage/biomarker_card.dart';
 import 'package:urinova/widgets/homepage/test_schedule_card.dart';
 import 'package:urinova/widgets/homepage/risk_alert_card.dart';
-import 'package:urinova/widgets/homepage/biomarker_card.dart';
 import 'dart:math';
 
 class HomePage extends StatelessWidget {
@@ -125,7 +125,7 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.02),
+                          height: MediaQuery.of(context).size.height * 0.01),
                       hasHistory
                           ? ListView.builder(
                               shrinkWrap: true,
@@ -137,7 +137,7 @@ class HomePage extends StatelessWidget {
                                   padding: EdgeInsets.only(
                                       bottom:
                                           MediaQuery.of(context).size.height *
-                                              0.015),
+                                              0.005),
                                   child: BiomarkerCard(
                                     name: b["name"],
                                     value: b["value"],

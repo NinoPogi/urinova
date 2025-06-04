@@ -44,7 +44,7 @@ class _BiomarkerCardState extends State<BiomarkerCard> {
               ),
               Container(
                 padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.05),
+                    horizontal: MediaQuery.of(context).size.width * 0.08),
                 decoration: BoxDecoration(
                   color: widget.color,
                   borderRadius: BorderRadius.circular(16),

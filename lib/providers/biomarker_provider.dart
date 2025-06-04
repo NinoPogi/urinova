@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:urinova/constants/biomarker_constant.dart';
 
 class BiomarkerProvider with ChangeNotifier {
-  List<int> _biomarkers = [];
+  List<int> _biomarkers = List.filled(10, 0);
   List<List<int>> _history = [];
+  String? _loadingProfileId;
 
   List<int> get biomarkers => _biomarkers;
   List<List<int>> get history => _history;
-
-  get biomarkerHistory => null;
+  String? get loadingProfileId => _loadingProfileId;
 
   Future<void> loadHistoryForProfile(String userId, String profileId) async {
+    _loadingProfileId = profileId;
+    notifyListeners();
     try {
       final testsSnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -21,33 +23,31 @@ class BiomarkerProvider with ChangeNotifier {
           .collection('tests')
           .orderBy('date')
           .get();
-
       _history = testsSnapshot.docs.map((doc) {
         final data = doc.data();
-        return List<int>.from(data['biomarkers']);
+        List<int> biomarkers = List<int>.from(data['biomarkers']);
+        while (biomarkers.length < 10) {
+          biomarkers.add(0);
+        }
+        return biomarkers.take(10).toList();
       }).toList();
-
       if (_history.isNotEmpty) {
         _biomarkers = _history.last;
       } else {
-        _biomarkers = [];
+        _biomarkers = List.filled(10, 0);
       }
-
-      notifyListeners();
     } catch (e) {
       print('Error loading history: $e');
       _history = [];
-      _biomarkers = [];
+      _biomarkers = List.filled(10, 0);
+    } finally {
+      _loadingProfileId = null;
       notifyListeners();
     }
   }
 
   void updateBiomarkers(List<int> newBiomarkers) {
     const int expectedLength = 10;
-    if (newBiomarkers.length != expectedLength) {
-      print(
-          'Warning: Received ${newBiomarkers.length} biomarkers, expected $expectedLength');
-    }
     _biomarkers = newBiomarkers.take(expectedLength).toList();
     while (_biomarkers.length < expectedLength) {
       _biomarkers.add(0);
@@ -77,7 +77,6 @@ class BiomarkerProvider with ChangeNotifier {
 
   List<String> getRecommendations() {
     if (_history.isEmpty) return [];
-
     Map<String, String> finalAdvice = {};
     for (int i = 0; i < _biomarkers.length; i++) {
       int riskWeight = getRiskWeight(i, _biomarkers[i]);
@@ -92,13 +91,10 @@ class BiomarkerProvider with ChangeNotifier {
         }
       }
     }
-
-    if (finalAdvice.isEmpty) {
-      return [
-        "All your biomarkers are within normal ranges. Continue maintaining a healthy lifestyle!"
-      ];
-    } else {
-      return finalAdvice.entries.map((e) => "${e.key}: ${e.value}").toList();
-    }
+    return finalAdvice.isEmpty
+        ? [
+            "All your biomarkers are within normal ranges. Continue maintaining a healthy lifestyle!"
+          ]
+        : finalAdvice.entries.map((e) => "${e.key}: ${e.value}").toList();
   }
 }

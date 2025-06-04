@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:urinova/widgets/insights/diet_simulation_modal.dart';
+import 'package:urinova/widgets/insights/biomarkers_modal.dart';
 
 class BiomarkersCard extends StatefulWidget {
   const BiomarkersCard({super.key});
@@ -13,14 +13,14 @@ class _BiomarkersCardState extends State<BiomarkersCard> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => const DietSimulationModal(),
+      builder: (context) => const BiomarkersModal(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // onTap: () => _showModal(context),
+      onTap: () => _showModal(context),
       child: Container(
         padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
         width: double.infinity,
@@ -30,26 +30,19 @@ class _BiomarkersCardState extends State<BiomarkersCard> {
           borderRadius: BorderRadius.circular(22),
           boxShadow: const [
             BoxShadow(
-              color: Colors.black26,
-              blurRadius: 8,
-              offset: Offset(0, 6),
-              spreadRadius: -8,
-            ),
+                color: Colors.black26,
+                blurRadius: 8,
+                offset: Offset(0, 6),
+                spreadRadius: -8),
           ],
         ),
-        child: Stack(
-          children: [
-            Text(
-              'Biomarkers 🎓',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Work Sans',
-                letterSpacing: -1,
-                decoration: TextDecoration.lineThrough,
-              ),
-            ),
-          ],
+        child: const Text(
+          'Biomarkers 🎓',
+          style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Work Sans',
+              letterSpacing: -1),
         ),
       ),
     );

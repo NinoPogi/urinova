@@ -41,6 +41,8 @@ dependencies:
   firebase_core: ^3.12.0
   firebase_auth: ^5.5.1
   cloud_firestore: ^5.6.5
+  share_plus: ^7.0.0
+  path_provider: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -69,9 +71,9 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/images/device.gif
-    - assets/images/profile.gif
     - assets/images/load_dip_test.gif
     - assets/images/urine_loading.gif
+    - assets/images/urine_unloading.gif
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

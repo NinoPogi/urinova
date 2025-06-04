@@ -13,7 +13,7 @@ class HistoricalDataModal extends StatelessWidget {
     final history = biomarkerProvider.history;
 
     String getTrend(int index) {
-      if (history.length < 2) return 'No trend';
+      if (history.length < 2) return '→';
       final last = history.last[index];
       final prev = history[history.length - 2][index];
       return last > prev
@@ -33,23 +33,26 @@ class HistoricalDataModal extends StatelessWidget {
 
       return Card(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Column(
             children: [
-              Text(
-                '$biomarkerName ${getTrend(biomarkerIndex)}',
-                style: const TextStyle(fontSize: 18),
-              ),
+              Text('$biomarkerName ${getTrend(biomarkerIndex)}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
               SizedBox(
                 height: 200,
                 child: SfCartesianChart(
+                  legend:
+                      Legend(isVisible: true, position: LegendPosition.bottom),
                   primaryXAxis: NumericAxis(isVisible: false),
                   primaryYAxis: NumericAxis(isVisible: false),
                   series: <ChartSeries<ChartData, int>>[
                     LineSeries<ChartData, int>(
+                      name: biomarkerName,
                       dataSource: biomarkerValues,
                       xValueMapper: (ChartData data, _) => data.x,
                       yValueMapper: (ChartData data, _) => data.y,
+                      color: const Color.fromARGB(255, 255, 162, 82),
                     ),
                   ],
                 ),
@@ -60,24 +63,40 @@ class HistoricalDataModal extends StatelessWidget {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Historical Data'),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      body: ListView(
-        children: biomarkerNames.asMap().entries.map((entry) {
-          final index = entry.key;
-          return createBiomarkerGraph(index);
-        }).toList(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Historical Data',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          Expanded(
+            child: ListView(
+                children: biomarkerNames
+                    .asMap()
+                    .entries
+                    .map((entry) => createBiomarkerGraph(entry.key))
+                    .toList()),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 255, 162, 82)),
+            child: const Text('Close', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
 }
 
-// Helper class to represent chart data
 class ChartData {
   final int x;
   final int y;
-
   ChartData(this.x, this.y);
 }

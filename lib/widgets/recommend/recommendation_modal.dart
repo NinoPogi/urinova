@@ -14,35 +14,33 @@ class RecommendationModal extends StatelessWidget {
         hasHistory ? biomarkerProvider.getRecommendations() : [];
 
     return Container(
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            'Personalized Recommendations',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 10),
+          const Text('Personalized Recommendations',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
           hasHistory
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: recommendations
                       .map((rec) =>
-                          Text('- $rec', style: TextStyle(fontSize: 18)))
+                          Text('- $rec', style: const TextStyle(fontSize: 18)))
                       .toList(),
                 )
-              : Text(
-                  "No recommendation yet. Conduct a test first.",
-                  style: TextStyle(fontSize: 18),
-                ),
-          SizedBox(height: 20),
+              : const Text('No recommendation yet. Conduct a test first.',
+                  style: TextStyle(fontSize: 18)),
+          const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Close"),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 255, 162, 82)),
+            child: const Text('Close', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

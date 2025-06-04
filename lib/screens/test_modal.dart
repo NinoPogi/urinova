@@ -19,7 +19,7 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
   BluetoothDevice? _connectedDevice;
   bool _isConnected = false;
   bool _isScanning = false;
-  int _liquidLevel = 0; // Mock value
+  bool _scanningComplete = false;
 
   @override
   void dispose() {
@@ -27,6 +27,7 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
     super.dispose();
   }
 
+  /// Returns the title for the current step
   String _getPageTitle() {
     switch (_currentStep) {
       case 0:
@@ -36,14 +37,17 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
       case 2:
         return 'Urine Loading';
       case 3:
-        return 'Scanning';
+        return 'Urine Unloading';
       case 4:
+        return 'Scanning';
+      case 5:
         return 'Test Summary';
       default:
         return 'Test';
     }
   }
 
+  /// Checks if the user can proceed to the next step
   bool _canGoNext() {
     if (_currentStep == 0) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -52,8 +56,10 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
     return true;
   }
 
+  /// Sends a command to the Bluetooth device
   Future<void> _sendCommand(int command) async {
     if (_connectedDevice == null || !_isConnected) return;
+
     List<BluetoothService> services =
         await _connectedDevice!.discoverServices();
     for (BluetoothService service in services) {
@@ -66,12 +72,18 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
     }
   }
 
+  /// Initiates the scanning process
   void _startScanning() async {
     if (_connectedDevice == null || !_isConnected || _isScanning) return;
-    setState(() => _isScanning = true);
-    await _sendCommand(0x03);
+
+    setState(() {
+      _isScanning = true;
+      _scanningComplete = false;
+    });
+    await _sendCommand(0x03); // Command to start scanning
   }
 
+  /// Scans for and connects to the Bluetooth device
   void _startScanAndConnect() async {
     if (_isScanning) return;
     setState(() => _isScanning = true);
@@ -91,7 +103,7 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
                 if (received.isEmpty) return;
                 int dataType = received[0];
                 if (dataType == 0x02 && received.length >= 2) {
-                  setState(() => _liquidLevel = received[1]);
+                  // Handle liquid level or other data
                 } else if (dataType == 0x04 && received.length >= 11) {
                   List<int> biomarkers = received.sublist(1, 11);
                   Provider.of<BiomarkerProvider>(context, listen: false)
@@ -99,7 +111,7 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
                 } else if (dataType == 0x05) {
                   setState(() {
                     _isScanning = false;
-                    _currentStep = 4;
+                    _scanningComplete = true;
                   });
                 }
               });
@@ -124,6 +136,7 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
     });
   }
 
+  /// Handles confirmation and saves test data
   void _onConfirm() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final biomarkerProvider =
@@ -141,15 +154,19 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
           .doc(profileId)
           .collection('tests')
           .add(testData);
+      biomarkerProvider.loadHistoryForProfile(
+          userId, profileId); // Reload history
     }
     Navigator.of(context).pop();
   }
 
+  /// Builds the Connection page UI
   Widget _buildConnectionPage() {
     final userProvider = Provider.of<UserProvider>(context);
     return Column(
       children: [
-        Text('Select Profile'),
+        Image.asset('assets/images/device.gif', height: 154),
+        const Text('Select Profile'),
         DropdownButton<Map<String, dynamic>>(
           value: userProvider.currentProfile,
           items: userProvider.profiles
@@ -162,67 +179,85 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
             if (value != null) userProvider.setCurrentProfile(value);
           },
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Text('Current Time: ${DateTime.now().toString()}'),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         ElevatedButton(
-          onPressed: _isConnected ? null : _startScanAndConnect,
+          onPressed: _isScanning || _isConnected ? null : _startScanAndConnect,
           child: Text(_isScanning ? 'Scanning...' : 'Connect Device'),
         ),
-        if (_isConnected) Text('Device Connected'),
+        if (_isConnected) const Text('Device Connected'),
       ],
     );
   }
 
+  /// Builds the Load Dip Test page UI
   Widget _buildLoadDipTestPage() {
     return Column(
       children: [
-        Text('Load the Dip Test'),
+        const Text('Load the Dip Test'),
         Image.asset('assets/images/load_dip_test.gif'),
-        Text('Instructions: Place the dip test in the slot as shown.'),
+        const Text('Instructions: Place the dip test in the slot as shown.'),
       ],
     );
   }
 
+  /// Builds the Urine Loading page UI
   Widget _buildUrineLoadingPage() {
     return Column(
       children: [
-        Text('Urine Loading'),
+        const Text('Urine Loading'),
         Image.asset('assets/images/urine_loading.gif'),
-        Text('Instructions: Load the urine sample as shown.'),
-        SizedBox(height: 20),
-        Text('Liquid Sensor Reading: $_liquidLevel%'),
+        const Text('Instructions: Load the urine sample as shown.'),
+        const SizedBox(height: 20),
       ],
     );
   }
 
+  /// Builds the Urine Unloading page UI
+  Widget _buildUrineUnloadingPage() {
+    return Column(
+      children: [
+        const Text('Urine Unloading'),
+        Image.asset('assets/images/urine_unloading.gif'),
+        const Text(
+            'Instructions: Unload the urine sample as shown, after a minute.'),
+      ],
+    );
+  }
+
+  /// Builds the Scanning page UI
   Widget _buildScanningPage() {
     return Column(
       children: [
-        Text('Scanning Page'),
+        const Text('Scanning Page'),
         _isScanning
             ? Container(
-                height: 50, child: Center(child: CircularProgressIndicator()))
-            : Text('Press Scan Now to start scanning'),
+                height: 50,
+                child: const Center(child: CircularProgressIndicator()))
+            : const Text('Press Scan Now to start scanning'),
       ],
     );
   }
 
+  /// Builds the Test Summary page UI
   Widget _buildTestSummaryPage() {
     final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
     return Column(
       children: [
-        Text('Test Summary'),
+        const Text('Test Summary'),
         ...biomarkerProvider.biomarkers.asMap().entries.map((entry) {
           final index = entry.key;
           final value = entry.value;
-          if (index >= biomarkerNames.length || index >= biomarkerValues.length)
-            return SizedBox();
+          if (index >= biomarkerNames.length ||
+              index >= biomarkerValues.length) {
+            return const SizedBox();
+          }
           return ListTile(
             title: Text(biomarkerNames[index]),
             subtitle: (value < biomarkerValues[index].length)
                 ? Text(biomarkerValues[index][value])
-                : Text("Invalid value"),
+                : const Text("Invalid value"),
           );
         }),
       ],
@@ -231,6 +266,75 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    Widget body;
+    switch (_currentStep) {
+      case 0:
+        body = _buildConnectionPage();
+        break;
+      case 1:
+        body = _buildLoadDipTestPage();
+        break;
+      case 2:
+        body = _buildUrineLoadingPage();
+        break;
+      case 3:
+        body = _buildUrineUnloadingPage();
+        break;
+      case 4:
+        body = _buildScanningPage();
+        break;
+      case 5:
+        body = _buildTestSummaryPage();
+        break;
+      default:
+        body = const SizedBox.shrink();
+    }
+
+    Widget rightButton;
+    if (_currentStep < 3) {
+      // Connection, Load Dip Test, Urine Loading
+      rightButton = ElevatedButton(
+        onPressed: _isScanning || !_canGoNext()
+            ? null
+            : () => setState(() => _currentStep++),
+        child: const Text('Next'),
+      );
+    } else if (_currentStep == 3) {
+      // Urine Unloading
+      rightButton = ElevatedButton(
+        onPressed: _isScanning || !_canGoNext()
+            ? null
+            : () async {
+                setState(() => _isScanning = true);
+                await _sendCommand(0x01); // Send 0x01 command for unloading
+                setState(() {
+                  _isScanning = false;
+                  _currentStep++;
+                });
+              },
+        child: _isScanning ? const Text('Processing...') : const Text('Next'),
+      );
+    } else if (_currentStep == 4) {
+      // Scanning
+      if (!_isScanning && !_scanningComplete) {
+        rightButton = ElevatedButton(
+            onPressed: _startScanning, child: const Text('Scan Now'));
+      } else if (_scanningComplete) {
+        rightButton = ElevatedButton(
+            onPressed: () => setState(() => _currentStep++),
+            child: const Text('Next'));
+      } else {
+        rightButton =
+            ElevatedButton(onPressed: null, child: const Text('Scanning...'));
+      }
+    } else if (_currentStep == 5) {
+      // Test Summary
+      rightButton =
+          ElevatedButton(onPressed: _onConfirm, child: const Text('Done'));
+    } else {
+      rightButton = const SizedBox.shrink();
+    }
+
     return Container(
       color: Colors.transparent,
       child: DraggableScrollableSheet(
@@ -251,7 +355,7 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
                     children: [
                       Text(
                         _getPageTitle(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           fontFamily: "Work Sans",
@@ -260,50 +364,27 @@ class _TestBottomSheetState extends State<TestBottomSheet> {
                       ),
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 0.1),
-                      if (_currentStep == 0) _buildConnectionPage(),
-                      if (_currentStep == 1) _buildLoadDipTestPage(),
-                      if (_currentStep == 2) _buildUrineLoadingPage(),
-                      if (_currentStep == 3) _buildScanningPage(),
-                      if (_currentStep == 4) _buildTestSummaryPage(),
+                      body,
                     ],
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   color: Colors.white,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (_currentStep > 0 && _currentStep < 4)
+                      if (_currentStep > 0 && _currentStep < 6)
                         ElevatedButton(
                           onPressed: () => setState(() => _currentStep--),
-                          child: Text('Previous'),
+                          child: const Text('Previous'),
                         )
                       else
-                        SizedBox(width: 100),
-                      if (_currentStep < 3)
-                        ElevatedButton(
-                          onPressed: () async {
-                            if (_canGoNext()) {
-                              if (_currentStep == 2) await _sendCommand(0x01);
-                              setState(() => _currentStep++);
-                            }
-                          },
-                          child: Text('Next'),
-                        )
-                      else if (_currentStep == 3)
-                        ElevatedButton(
-                          onPressed: _isScanning ? null : _startScanning,
-                          child: Text('Scan Now'),
-                        )
-                      else if (_currentStep == 4)
-                        ElevatedButton(
-                          onPressed: _onConfirm,
-                          child: Text('Done'),
-                        ),
+                        const SizedBox(width: 100),
+                      rightButton,
                     ],
                   ),
-                )
+                ),
               ],
             ),
           );

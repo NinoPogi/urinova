@@ -17,68 +17,67 @@ class _ManageProfilesModalState extends State<ManageProfilesModal> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Manage Profiles', style: TextStyle(fontSize: 24)),
-          Expanded(
-            child: ListView.builder(
-              itemCount: userProvider.profiles.length,
-              itemBuilder: (context, index) {
-                final profile = userProvider.profiles[index];
-                return ListTile(
-                  title: Text(profile['name']),
-                  subtitle: Text(_getScheduleSummary(profile['testSchedule'])),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () => _editProfile(context, profile),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () => _deleteProfile(context, profile),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Manage Profiles', style: TextStyle(fontSize: 24)),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => _addProfile(context),
-            child: Text('Add Profile'),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: ClampingScrollPhysics(),
+            itemCount: userProvider.profiles.length,
+            itemBuilder: (context, index) {
+              final profile = userProvider.profiles[index];
+              return ListTile(
+                title: Text(profile['name']),
+                subtitle: Text(_getScheduleSummary(profile['testSchedule'])),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => _editProfile(context, profile),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => _deleteProfile(context, profile),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _addProfile(context),
+              child: const Text('Add Profile'),
+            ),
           ),
         ],
       ),
     );
   }
 
-  String formatTime(int hour, int minute) {
-    String period = hour >= 12 ? 'PM' : 'AM';
-    int displayHour = hour % 12;
-    if (displayHour == 0) displayHour = 12;
-    String minuteStr = minute.toString().padLeft(2, '0');
-    return '$displayHour:$minuteStr $period';
-  }
-
-// Updated schedule summary method
   String _getScheduleSummary(Map<String, dynamic>? schedule) {
     if (schedule == null) return 'No schedule';
     final frequency = schedule['frequency'];
-    final hour = schedule['hour'] as int;
-    final minute = schedule['minute'] as int; // Assuming minute is available
-    final timeStr = formatTime(hour, minute);
-
-    if (frequency == 'daily') {
-      return 'Daily at $timeStr';
-    } else if (frequency == 'weekly') {
-      final days = (schedule['days'] as List<dynamic>).join(', ');
-      return 'Weekly on $days at $timeStr';
-    } else {
-      return 'Custom schedule';
-    }
+    final hour = schedule['hour'];
+    final minute = schedule['minute'];
+    final time = TimeOfDay(hour: hour, minute: minute).format(context);
+    if (frequency == 'daily') return 'Daily at $time';
+    if (frequency == 'weekly')
+      return 'Weekly on ${(schedule['days'] as List).join(', ')} at $time';
+    return 'Custom schedule';
   }
 
   void _editProfile(BuildContext context, Map<String, dynamic> profile) {
@@ -97,19 +96,12 @@ class _ManageProfilesModalState extends State<ManageProfilesModal> {
               .collection('profiles')
               .doc(profileId)
               .update(updatedProfile);
-          final index =
-              userProvider.profiles.indexWhere((p) => p['id'] == profileId);
-          if (index != -1) {
-            userProvider.profiles[index] = {
-              ...userProvider.profiles[index],
-              ...updatedProfile,
-            };
-            if (userProvider.currentProfile?['id'] == profileId) {
-              userProvider.setCurrentProfile(userProvider.profiles[index]);
-            } else {
-              userProvider.notifyListeners();
-            }
-          }
+          userProvider.profiles[
+              userProvider.profiles.indexWhere((p) => p['id'] == profileId)] = {
+            ...profile,
+            ...updatedProfile,
+          };
+          userProvider.notifyListeners();
         },
       ),
     );
@@ -119,20 +111,19 @@ class _ManageProfilesModalState extends State<ManageProfilesModal> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Profile?'),
+        title: const Text('Delete Profile?'),
         content: Text('Are you sure you want to delete ${profile['name']}?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
-          ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
           TextButton(
             onPressed: () {
               Provider.of<UserProvider>(context, listen: false)
                   .deleteProfile(profile['id']);
               Navigator.pop(context);
             },
-            child: Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -141,66 +132,63 @@ class _ManageProfilesModalState extends State<ManageProfilesModal> {
 
   void _addProfile(BuildContext context) {
     final _nameController = TextEditingController();
+    String? _selectedGender;
     Map<String, dynamic>? _newSchedule;
-    String? selectedGender;
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: Text('Add Profile'),
+          title: const Text('Add Profile'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Profile Name'),
+                decoration: const InputDecoration(labelText: 'Name'),
               ),
               DropdownButton<String>(
-                value: selectedGender,
-                hint: Text('Select Gender'),
-                items: ['Male', 'Female']
-                    .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                    .toList(),
-                onChanged: (v) => setState(() => selectedGender = v),
+                value: _selectedGender,
+                hint: const Text('Gender'),
+                items: ['Male', 'Female'].map((String value) {
+                  return DropdownMenuItem<String>(
+                      value: value, child: Text(value));
+                }).toList(),
+                onChanged: (value) => setState(() => _selectedGender = value),
               ),
               ElevatedButton(
                 onPressed: () async {
                   final schedule = await showDialog(
                     context: context,
-                    builder: (context) => ScheduleEditorDialog(),
+                    builder: (context) => const ScheduleEditorDialog(),
                   );
-                  if (schedule != null) {
-                    setState(() {
-                      _newSchedule = schedule;
-                    });
-                  }
+                  if (schedule != null) setState(() => _newSchedule = schedule);
                 },
                 child: Text(
-                    _newSchedule == null ? 'Set Schedule' : 'Schedule Set'),
+                    _newSchedule == null ? 'Set Schedule' : 'Edit Schedule'),
               ),
             ],
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
-            ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel')),
             TextButton(
               onPressed: () {
-                final name = _nameController.text.trim();
-                if (name.isEmpty || selectedGender == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('Please enter name and select gender')));
+                if (_nameController.text.isEmpty || _selectedGender == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Name and gender are required')),
+                  );
                   return;
                 }
                 Provider.of<UserProvider>(context, listen: false).addProfile(
-                  name,
-                  gender: selectedGender,
+                  _nameController.text,
+                  gender: _selectedGender,
                   schedule: _newSchedule,
                 );
                 Navigator.pop(context);
               },
-              child: Text('Add'),
+              child: const Text('Add'),
             ),
           ],
         ),
