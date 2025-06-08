@@ -26,7 +26,7 @@ class _BiomarkersCardState extends State<BiomarkersCard> {
         width: double.infinity,
         height: MediaQuery.of(context).size.height * 0.16,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.black,
           borderRadius: BorderRadius.circular(22),
           boxShadow: const [
             BoxShadow(
@@ -39,10 +39,12 @@ class _BiomarkersCardState extends State<BiomarkersCard> {
         child: const Text(
           'Biomarkers 🎓',
           style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Work Sans',
-              letterSpacing: -1),
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Work Sans',
+            letterSpacing: -1,
+            color: Colors.white,
+          ),
         ),
       ),
     );

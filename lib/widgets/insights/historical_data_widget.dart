@@ -17,7 +17,7 @@ class _HistoricalDataWidgetState extends State<HistoricalDataWidget> {
     final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
     final history = biomarkerProvider.history;
     if (history.isEmpty) {
-      return Center(child: Text("No historical data available"));
+      return Center(child: Text("No historical data available yet"));
     }
     final latestValues = biomarkerProvider.biomarkers;
     List<int> importantIndices = latestValues

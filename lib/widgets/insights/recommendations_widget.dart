@@ -21,7 +21,7 @@ class _RecommendationsWidgetState extends State<RecommendationsWidget> {
     final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
     final recommendations = biomarkerProvider.getRecommendations();
     if (recommendations.isEmpty) {
-      return Center(child: Text("No recommendations available"));
+      return Center(child: Text("No recommendations available yet"));
     }
     final latestValues = biomarkerProvider.biomarkers;
     List<int> importantIndices = latestValues

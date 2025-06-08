@@ -26,7 +26,7 @@ class _DietSimulationCardState extends State<DietSimulationCard> {
         width: double.infinity,
         height: MediaQuery.of(context).size.height * 0.18,
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: const Color.fromARGB(255, 255, 162, 82),
           borderRadius: BorderRadius.circular(22),
           boxShadow: const [
             BoxShadow(

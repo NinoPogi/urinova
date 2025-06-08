@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:urinova/widgets/header_part.dart';
 import 'package:urinova/widgets/insights/diet_simulation_card.dart';
 import 'package:urinova/widgets/insights/biomarkers_card.dart';
-import 'package:urinova/widgets/insights/historical_data_widget.dart';
-import 'package:urinova/widgets/insights/recommendations_widget.dart';
+import 'package:urinova/widgets/insights/historical_data_card.dart';
 
 class InsightsPage extends StatelessWidget {
   final VoidCallback onNavigateToProfile;
@@ -24,9 +23,10 @@ class InsightsPage extends StatelessWidget {
           HeaderPart(
               name: "Insights 💡", onNavigateToProfile: onNavigateToProfile),
           SizedBox(height: MediaQuery.of(context).size.height * 0.12),
-          HistoricalDataWidget(),
-          RecommendationsWidget(),
+          HistoricalDataCard(),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.01),
           DietSimulationCard(),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.01),
           BiomarkersCard(),
         ],
       ),

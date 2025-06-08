@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:urinova/widgets/insights/historical_data_modal.dart';
+import 'package:urinova/widgets/insights/historical_data_widget.dart';
+import 'package:urinova/widgets/insights/recommendations_widget.dart';
 
 class HistoricalDataCard extends StatefulWidget {
   const HistoricalDataCard({super.key});
@@ -20,13 +22,12 @@ class _HistoricalDataCardState extends State<HistoricalDataCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _showModal(context),
+      onTap: () => (context),
       child: Container(
         padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
         width: double.infinity,
-        height: MediaQuery.of(context).size.height * 0.18,
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 255, 162, 82),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(22),
           boxShadow: const [
             BoxShadow(
@@ -37,17 +38,19 @@ class _HistoricalDataCardState extends State<HistoricalDataCard> {
             ),
           ],
         ),
-        child: Stack(
+        child: Column(
           children: [
             Text(
               'Historical Data 📉',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Work Sans',
                 letterSpacing: -1,
               ),
             ),
+            HistoricalDataWidget(),
+            RecommendationsWidget(),
           ],
         ),
       ),
