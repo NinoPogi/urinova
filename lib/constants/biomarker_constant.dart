@@ -60,47 +60,200 @@ const List<List<String>> biomarkerValues = [
   ], // Glucose
 ];
 
-const Map<String, Map<String, String>> recommendationTable = {
+const Map<String, List<String>> personalizedRecos = {
+  "Leukocytes": [
+    "Normal hydration", // Negative (-)
+    "Increase water intake slightly", // 15 ±
+    "Monitor for infection", // 70+
+    "Consult doctor for possible infection", // 125++
+    "Seek medical attention if persistent" // 500+++
+  ],
+  "Nitrites": [
+    "Maintain hygiene", // Negative (-)
+    "Increase hydration, consult doctor" // Positive (+)
+  ],
+  "Urobilinogen": [
+    "Balanced diet", // 0 (3.5)
+    "Maintain hydration", // 1 (17)
+    "Monitor liver function", // 2 (35)
+    "Increase hydration, consult doctor", // 4 (70)
+    "Liver evaluation recommended", // 8 (140)
+    "Seek urgent liver assessment" // 12 (200)
+  ],
+  "Protein": [
+    "No action needed", // Negative (-)
+    "Reduce sodium intake", // 15 (0.15)
+    "Monitor diet and hydration", // 30 (0.3)+
+    "Consult doctor for kidney check", // 100 (1.0)++
+    "Seek medical advice soon", // 300 (3.0)+++
+    "Urgent kidney evaluation" // 2000 (20)+++
+  ],
+  "pH": [
+    "Adjust to acidic foods if needed", // 5.0
+    "Maintain balanced diet", // 6.0
+    "No change needed", // 6.5
+    "Balanced diet", // 7.0
+    "Monitor hydration", // 7.5
+    "Increase water, adjust diet", // 8.0
+    "Consult doctor for alkalinity" // 9.0
+  ],
+  "Blood": [
+    "Normal diet", // Negative (-)
+    "Hydrate and rest", // ±
+    "Monitor closely", // +
+    "Consult doctor", // ++
+    "Seek medical advice", // +++
+    "Urgent care if persistent", // 5-10 Ery/µL
+    "Seek immediate attention" // 50 Ery/µL
+  ],
+  "Specific Gravity": [
+    "Check hydration", // 1.000
+    "Stay hydrated", // 1.005
+    "Maintain hydration", // 1.010
+    "No change needed", // 1.015
+    "Monitor fluid intake", // 1.020
+    "Avoid dehydration", // 1.025
+    "Check kidney function" // 1.030
+  ],
+  "Ketones": [
+    "No change needed", // Negative (-)
+    "Increase water", // 5 (0.5)
+    "Monitor carb intake", // 15 (1.5)
+    "Increase carbs slightly", // 40 (4.0)
+    "Adjust diet, consult doctor", // 80 (8.0)
+    "Seek medical advice" // 160 (16)
+  ],
+  "Bilirubin": [
+    "No change needed", // Negative (-)
+    "Increase hydration", // 1 (17)+
+    "Monitor liver health", // 2 (35)++
+    "Seek liver evaluation" // 4 (70)+++
+  ],
+  "Glucose": [
+    "Maintain balanced diet", // Negative (-)
+    "Monitor sugar intake", // 100 (5)
+    "Reduce carbs, exercise", // 250 (15)
+    "Consult doctor", // 500 (30)
+    "Seek medical advice", // 1000 (60)
+    "Urgent care needed" // ≥2000 (110)
+  ]
+};
+
+const Map<String, Map<String, String>> trendRecos = {
   "Leukocytes": {
-    "1": "Normal hydration",
-    "2": "Increase water",
-    "3": "Test for infection"
+    "increasing": "Possible infection risk, monitor closely",
+    "decreasing": "Infection may be resolving, continue care",
+    "stable": "No immediate concern, maintain hygiene"
   },
   "Nitrites": {
-    "1": "Maintain hygiene",
-    "2": "Increase water",
-    "3": "Seek medical attention"
+    "increasing": "Risk of infection, consult doctor",
+    "decreasing": "Improvement noted, maintain hygiene",
+    "stable": "Continue monitoring"
   },
   "Urobilinogen": {
-    "1": "Balanced diet",
-    "2": "Increase hydration",
-    "3": "Liver evaluation"
+    "increasing": "Monitor liver function closely",
+    "decreasing": "Liver may be stabilizing, keep hydrated",
+    "stable": "Maintain current lifestyle"
   },
-  "Protein": {"1": "No action", "2": "Reduce sodium", "3": "Consult doctor"},
+  "Protein": {
+    "increasing": "Possible kidney strain, consult doctor",
+    "decreasing": "Kidney function improving, monitor diet",
+    "stable": "No urgent action needed"
+  },
   "pH": {
-    "1": "Maintain balanced diet",
-    "2": "Adjust to acidic foods",
-    "3": "Consult doctor"
+    "increasing": "Check for alkalinity issues",
+    "decreasing": "Monitor for acidity, adjust diet",
+    "stable": "Maintain current diet"
   },
   "Blood": {
-    "1": "Normal diet",
-    "2": "Hydrate, rest",
-    "3": "Seek medical advice"
+    "increasing": "Risk of worsening, seek advice",
+    "decreasing": "May be resolving, rest and hydrate",
+    "stable": "Continue monitoring"
   },
   "Specific Gravity": {
-    "1": "Stay hydrated",
-    "2": "Avoid dehydration",
-    "3": "Check kidney function"
+    "increasing": "Risk of dehydration, hydrate more",
+    "decreasing": "Hydration improving, maintain intake",
+    "stable": "Hydration stable, no change"
   },
-  "Ketones": {"1": "No change", "2": "Drink water", "3": "Increase carbs"},
+  "Ketones": {
+    "increasing": "Risk of ketosis, increase carbs",
+    "decreasing": "Ketosis reducing, monitor diet",
+    "stable": "No immediate concern"
+  },
   "Bilirubin": {
-    "1": "No change",
-    "2": "Increase water",
-    "3": "Liver evaluation"
+    "increasing": "Liver stress possible, consult doctor",
+    "decreasing": "Liver improving, maintain hydration",
+    "stable": "No urgent action"
   },
   "Glucose": {
-    "1": "Maintain balanced diet",
-    "2": "Reduce carbs, exercise",
-    "3": "Consult doctor"
+    "increasing": "Risk of hyperglycemia, seek advice",
+    "decreasing": "Glucose stabilizing, monitor diet",
+    "stable": "Maintain current management"
   }
+};
+
+const Map<String, Map<String, String>> dietaryRecos = {
+  "Leukocytes": {
+    "increasing": "Increase water, consider cranberry juice",
+    "decreasing": "Maintain hydration, balanced diet",
+    "stable": "No specific changes needed"
+  },
+  "Nitrites": {
+    "increasing": "Boost hydration, avoid sugary drinks",
+    "decreasing": "Continue hydration, light diet",
+    "stable": "Maintain balanced diet"
+  },
+  "Urobilinogen": {
+    "increasing": "Add leafy greens, stay hydrated",
+    "decreasing": "Maintain balanced diet, water",
+    "stable": "No dietary adjustment"
+  },
+  "Protein": {
+    "increasing": "Reduce sodium, lean proteins",
+    "decreasing": "Low-sodium diet, hydrate",
+    "stable": "Balanced diet sufficient"
+  },
+  "pH": {
+    "increasing": "More citrus fruits if too alkaline",
+    "decreasing": "Reduce acidic foods if needed",
+    "stable": "Keep diet balanced"
+  },
+  "Blood": {
+    "increasing": "Hydrate, avoid salty foods",
+    "decreasing": "Light diet, plenty of water",
+    "stable": "No specific changes"
+  },
+  "Specific Gravity": {
+    "increasing": "Increase water intake",
+    "decreasing": "Maintain fluid intake",
+    "stable": "Hydration adequate"
+  },
+  "Ketones": {
+    "increasing": "Add carbs like fruits, grains",
+    "decreasing": "Balanced carbs, hydrate",
+    "stable": "No dietary change"
+  },
+  "Bilirubin": {
+    "increasing": "Hydrate, avoid fatty foods",
+    "decreasing": "Light diet, stay hydrated",
+    "stable": "Maintain current diet"
+  },
+  "Glucose": {
+    "increasing": "Reduce sugars, complex carbs",
+    "decreasing": "Low-sugar diet, monitor",
+    "stable": "Balanced diet sufficient"
+  }
+};
+
+const Map<String, int> biomarkerWeights = {
+  "Leukocytes": 2,
+  "Nitrites": 3,
+  "Urobilinogen": 1,
+  "Protein": 2,
+  "pH": 1,
+  "Blood": 3,
+  "Specific Gravity": 1,
+  "Ketones": 2,
+  "Bilirubin": 2,
+  "Glucose": 3
 };

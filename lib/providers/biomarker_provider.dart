@@ -60,41 +60,41 @@ class BiomarkerProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  int getRiskWeight(int biomarkerIndex, int valueIndex) {
-    if (valueIndex == 0) return 1;
-    if (valueIndex <= 2) return 2;
-    return 3;
-  }
-
-  int getTrendWeight(int biomarkerIndex) {
-    if (_history.length < 2) return 1;
+  String getTrend(int biomarkerIndex) {
+    if (_history.length < 2) return "stable";
     int latest = _biomarkers[biomarkerIndex];
     int previous = _history[_history.length - 2][biomarkerIndex];
-    if (latest > previous) return 3;
-    if (latest < previous) return 2;
-    return 1;
+    if (latest > previous) return "increasing";
+    if (latest < previous) return "decreasing";
+    return "stable";
   }
 
-  List<String> getRecommendations() {
+  List<Map<String, String>> getRecommendations() {
     if (_history.isEmpty) return [];
-    Map<String, String> finalAdvice = {};
+    List<Map<String, String>> recommendations = [];
     for (int i = 0; i < _biomarkers.length; i++) {
-      int riskWeight = getRiskWeight(i, _biomarkers[i]);
-      int trendWeight = getTrendWeight(i);
-      int urgencyScore = riskWeight * trendWeight;
-      if (urgencyScore > 1) {
-        String biomarker = biomarkerNames[i];
-        String rec =
-            recommendationTable[biomarker]?["$riskWeight"] ?? "Monitor";
-        if (!finalAdvice.containsKey(biomarker) || urgencyScore > 3) {
-          finalAdvice[biomarker] = rec;
-        }
-      }
+      String biomarker = biomarkerNames[i];
+      int level = _biomarkers[i];
+      String trend = getTrend(i);
+
+      String personalizedReco =
+          personalizedRecos[biomarker]?[level] ?? "Monitor";
+      String trendReco = trendRecos[biomarker]?[trend] ?? "Continue monitoring";
+      String dietaryReco =
+          dietaryRecos[biomarker]?[trend] ?? "Maintain current diet";
+
+      recommendations.add({
+        "biomarker": biomarker,
+        "text": "$personalizedReco. Trend: $trend. $trendReco",
+        "dietary": dietaryReco,
+        "weight": biomarkerWeights[biomarker]?.toString() ?? "1",
+        "trend": trend
+      });
     }
-    return finalAdvice.isEmpty
-        ? [
-            "All your biomarkers are within normal ranges. Continue maintaining a healthy lifestyle!"
-          ]
-        : finalAdvice.entries.map((e) => "${e.key}: ${e.value}").toList();
+
+    recommendations.sort(
+        (a, b) => int.parse(b["weight"]!).compareTo(int.parse(a["weight"]!)));
+
+    return recommendations;
   }
 }

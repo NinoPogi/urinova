@@ -11,8 +11,6 @@ class ManageProfilesModal extends StatefulWidget {
 }
 
 class _ManageProfilesModalState extends State<ManageProfilesModal> {
-  String? _selectedGender;
-
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);

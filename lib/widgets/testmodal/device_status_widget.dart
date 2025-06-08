@@ -18,9 +18,6 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
   bool _isScanning = false;
   bool _isSending = false;
 
-  int _batteryLevel = 100; // Example value (0-100)
-  int _urineLevel = 75; // Example value (0-100)
-
   @override
   void dispose() {
     super.dispose();
@@ -144,12 +141,6 @@ class _DeviceStatusWidgetState extends State<DeviceStatusWidget> {
       });
       // widget.onTestComplete();
     }
-  }
-
-  Color _getLevelColor(int level) {
-    if (level >= 70) return Colors.green;
-    if (level >= 30) return Colors.yellow;
-    return Colors.red;
   }
 
   @override
