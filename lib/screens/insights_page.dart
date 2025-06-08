@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:urinova/widgets/header_part.dart';
 import 'package:urinova/widgets/insights/diet_simulation_card.dart';
 import 'package:urinova/widgets/insights/biomarkers_card.dart';

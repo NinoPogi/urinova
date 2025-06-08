@@ -69,32 +69,31 @@ class BiomarkerProvider with ChangeNotifier {
     return "stable";
   }
 
-  List<Map<String, String>> getRecommendations() {
+  List<Map<String, dynamic>> getRecommendations() {
     if (_history.isEmpty) return [];
-    List<Map<String, String>> recommendations = [];
+    List<Map<String, dynamic>> recommendations = [];
     for (int i = 0; i < _biomarkers.length; i++) {
       String biomarker = biomarkerNames[i];
       int level = _biomarkers[i];
       String trend = getTrend(i);
-
       String personalizedReco =
           personalizedRecos[biomarker]?[level] ?? "Monitor";
       String trendReco = trendRecos[biomarker]?[trend] ?? "Continue monitoring";
       String dietaryReco =
           dietaryRecos[biomarker]?[trend] ?? "Maintain current diet";
-
+      int weight = biomarkerWeights[biomarker] ?? 1;
       recommendations.add({
         "biomarker": biomarker,
+        "level": level,
+        "trend": trend,
+        "personalizedReco": personalizedReco,
+        "trendReco": trendReco,
+        "dietaryReco": dietaryReco,
+        "weight": weight,
         "text": "$personalizedReco. Trend: $trend. $trendReco",
-        "dietary": dietaryReco,
-        "weight": biomarkerWeights[biomarker]?.toString() ?? "1",
-        "trend": trend
       });
     }
-
-    recommendations.sort(
-        (a, b) => int.parse(b["weight"]!).compareTo(int.parse(a["weight"]!)));
-
+    recommendations.sort((a, b) => b["weight"].compareTo(a["weight"]));
     return recommendations;
   }
 }

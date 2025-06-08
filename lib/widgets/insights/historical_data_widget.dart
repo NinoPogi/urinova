@@ -4,7 +4,14 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:urinova/constants/biomarker_constant.dart';
 import 'package:urinova/providers/biomarker_provider.dart';
 
-class HistoricalDataWidget extends StatelessWidget {
+class HistoricalDataWidget extends StatefulWidget {
+  @override
+  _HistoricalDataWidgetState createState() => _HistoricalDataWidgetState();
+}
+
+class _HistoricalDataWidgetState extends State<HistoricalDataWidget> {
+  bool showAll = false;
+
   @override
   Widget build(BuildContext context) {
     final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
@@ -12,11 +19,31 @@ class HistoricalDataWidget extends StatelessWidget {
     if (history.isEmpty) {
       return Center(child: Text("No historical data available"));
     }
-    return Column(
-      children: [
-        for (int i = 0; i < biomarkerNames.length; i++)
-          _BiomarkerTrendWidget(index: i),
-      ],
+    final latestValues = biomarkerProvider.biomarkers;
+    List<int> importantIndices = latestValues
+        .asMap()
+        .entries
+        .where((entry) => entry.value >= 2)
+        .map((entry) => entry.key)
+        .toList();
+    List<int> indicesToShow =
+        showAll ? List.generate(10, (i) => i) : importantIndices;
+
+    return Container(
+      color: showAll ? Colors.grey[200] : Colors.white,
+      padding: EdgeInsets.all(8),
+      child: Column(
+        children: [
+          if (indicesToShow.isEmpty)
+            Text("No concerning biomarkers")
+          else
+            ...indicesToShow.map((i) => _BiomarkerTrendWidget(index: i)),
+          TextButton(
+            onPressed: () => setState(() => showAll = !showAll),
+            child: Text(showAll ? "Hide" : "Show all"),
+          ),
+        ],
+      ),
     );
   }
 }
