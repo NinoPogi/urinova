@@ -13,7 +13,7 @@ class _RiskAlertCardState extends State<RiskAlertCard> {
   @override
   Widget build(BuildContext context) {
     final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
-    final hasHighRisk = biomarkerProvider.biomarkers.any((value) => value > 3);
+    final hasHighRisk = biomarkerProvider.hasHighRisk();
 
     return Container(
       padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),

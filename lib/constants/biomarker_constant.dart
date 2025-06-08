@@ -60,6 +60,19 @@ const List<List<String>> biomarkerValues = [
   ], // Glucose
 ];
 
+const List<List<String>> biomarkerSeverities = [
+  ['Green', 'Yellow', 'Orange', 'Red', 'Red'],
+  ['Green', 'Red'],
+  ['Green', 'Green', 'Yellow', 'Orange', 'Red', 'Red'],
+  ['Green', 'Yellow', 'Orange', 'Red', 'Red', 'Red'],
+  ['Green', 'Green', 'Green', 'Green', 'Green', 'Green', 'Yellow'],
+  ['Green', 'Yellow', 'Orange', 'Red', 'Red', 'Red', 'Red'],
+  ['Yellow', 'Green', 'Green', 'Green', 'Green', 'Yellow', 'Yellow'],
+  ['Green', 'Yellow', 'Orange', 'Red', 'Red', 'Red'],
+  ['Green', 'Red', 'Red', 'Red'],
+  ['Green', 'Yellow', 'Orange', 'Red', 'Red', 'Red'],
+];
+
 const Map<String, List<String>> personalizedRecos = {
   "Leukocytes": [
     "Normal hydration", // Negative (-)

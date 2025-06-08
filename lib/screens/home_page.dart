@@ -37,17 +37,31 @@ class HomePage extends StatelessWidget {
     }
   }
 
+  Color getSeverityColor(int biomarkerIndex, int valueIndex) {
+    if (valueIndex < 0 ||
+        valueIndex >= biomarkerSeverities[biomarkerIndex].length) {
+      return Colors.grey;
+    }
+    String severity = biomarkerSeverities[biomarkerIndex][valueIndex];
+    switch (severity) {
+      case 'Green':
+        return Colors.green;
+      case 'Yellow':
+        return Colors.yellowAccent;
+      case 'Orange':
+        return Colors.orange;
+      case 'Red':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final biomarkerProvider = Provider.of<BiomarkerProvider>(context);
     final hasHistory = biomarkerProvider.history.isNotEmpty;
     final randomMessage = _getMessage();
-
-    Color getSeverityColor(int value) {
-      if (value <= 1) return Colors.green;
-      if (value <= 3) return Colors.orange;
-      return Colors.red;
-    }
 
     final List<Map<String, dynamic>> biomarkers = hasHistory
         ? biomarkerProvider.biomarkers.asMap().entries.map(
@@ -57,7 +71,7 @@ class HomePage extends StatelessWidget {
               final validValue = value < biomarkerValues[index].length
                   ? value
                   : biomarkerValues[index].length - 1;
-              final color = getSeverityColor(validValue);
+              final color = getSeverityColor(index, validValue);
               return {
                 "name": biomarkerNames[index],
                 "value": biomarkerValues[index][validValue],

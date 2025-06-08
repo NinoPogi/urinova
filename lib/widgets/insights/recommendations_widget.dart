@@ -42,7 +42,7 @@ class _RecommendationsWidgetState extends State<RecommendationsWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Personalized Recommendations',
+          Text('Recommendations',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           if (filteredRecommendations.isEmpty)
             Text("No concerning recommendations")

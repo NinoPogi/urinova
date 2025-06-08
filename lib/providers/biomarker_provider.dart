@@ -96,4 +96,16 @@ class BiomarkerProvider with ChangeNotifier {
     recommendations.sort((a, b) => b["weight"].compareTo(a["weight"]));
     return recommendations;
   }
+
+  bool hasHighRisk() {
+    for (int i = 0; i < _biomarkers.length; i++) {
+      int valueIndex = _biomarkers[i];
+      if (valueIndex < 0 || valueIndex >= biomarkerSeverities[i].length)
+        continue;
+      if (biomarkerSeverities[i][valueIndex] == 'Red') {
+        return true;
+      }
+    }
+    return false;
+  }
 }
